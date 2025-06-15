@@ -17,14 +17,14 @@ import {
   Divider,
   Snackbar,
 } from '@mui/material';
-import { getPatients, getTherapists, createAppointment } from '../services/api';
-import { 
-  Appointment, 
-  Patient, 
-  Therapist, 
-  AppointmentStatus, 
-  AppointmentType
-} from '../types';
+import { getAllPatients } from '../services/patientAPI';
+import { getAllTherapists } from '../services/therapistAPI';
+import { createAppointment } from '../services/appointmentAPI';
+import { Appointment, } from '../types/Appointment';
+import { Patient } from '../types/Patient';
+import { Therapist } from '../types/Therapist';
+import { AppointmentType } from '../types/AppointmentType';
+
 import { addMinutes, setHours, setMinutes, setSeconds, setMilliseconds } from 'date-fns';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -32,6 +32,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // We keep useNavigate import for potential future use, but mark it as unused if not needed
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useNavigate } from 'react-router-dom';
+import { AppointmentSimple } from '../types/Simple/AppointmentSimple';
 
 const CreateAppointmentPage: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -39,12 +40,12 @@ const CreateAppointmentPage: React.FC = () => {
   
   // State for form data
   const [formData, setFormData] = useState<Partial<Appointment>>({
-    patientId: undefined,
-    therapistId: undefined,
-    status: AppointmentStatus.Gepland,
-    type: AppointmentType.FysioTherapie,
-    startTime: new Date().toISOString(),
-    durationMinutes: 30,
+    patient: undefined,
+    therapist: undefined,
+    practice: undefined,
+    appointmentType: undefined,
+    time: new Date().toISOString(),
+    duration: 25,
     notes: '',
   });
 
@@ -87,8 +88,8 @@ const CreateAppointmentPage: React.FC = () => {
       setLoading(true);
       try {
         const [patientsData, therapistsData] = await Promise.all([
-          getPatients(),
-          getTherapists()
+          getAllPatients(),
+          getAllTherapists()
         ]);
         setPatients(patientsData);
         setTherapists(therapistsData);
@@ -143,8 +144,8 @@ const CreateAppointmentPage: React.FC = () => {
     event.preventDefault();
     
     // Validate required fields
-    if (!formData.patientId || !formData.therapistId || !formData.startTime || 
-        formData.durationMinutes === undefined || formData.durationMinutes <= 0) {
+    if (!formData.patient || !formData.therapist || !formData.practice || 
+        !formData.time || !formData.duration || formData.duration <= 0 )  {
       setError('Please fill in all required fields with valid values.');
       return;
     }
@@ -162,7 +163,7 @@ const CreateAppointmentPage: React.FC = () => {
       
       // Calculate end time based on duration
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      let endTimeLocal = addMinutes(startTimeLocal, formData.durationMinutes || 30);
+      let endTimeLocal = addMinutes(startTimeLocal, formData.duration || 25);
       // endTimeLocal is used for calculating appointment duration
       
       // Timezone compensation
@@ -171,14 +172,14 @@ const CreateAppointmentPage: React.FC = () => {
       
       // Create a clean appointment object with only the necessary fields
       // to avoid entity tracking issues
-      const appointmentData = {
-        patientId: Number(formData.patientId),
-        therapistId: Number(formData.therapistId),
-        startTime: adjustedStart.toISOString(),
-        durationMinutes: formData.durationMinutes || 30,
-        status: Number(formData.status),
-        type: Number(formData.type),
-        notes: formData.notes || ''
+      const appointmentData:AppointmentSimple = {
+        patient: formData.patient,
+        therapist: formData.therapist,
+        practice: formData.practice,
+        time: adjustedStart.toISOString(),
+        duration: formData.duration || 25,
+        appointmentType: formData.appointmentType ?? AppointmentType.Default, // Replace 'Default' with a valid default value from AppointmentType
+        notes: formData.notes || '',
       };
       
       // Submit to API

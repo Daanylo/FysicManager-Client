@@ -23,7 +23,7 @@ import {
     DialogContentText,
     DialogTitle
 } from '@mui/material';
-import { getAppointment, updateAppointment, getPatients, getTherapists, deleteAppointment, updateAppointmentSimple } from '../services/api';
+import { getAppointment, updateAppointment, getPatients, getTherapists, deleteAppointment, updateAppointmentSimple } from '../services/patientAPI';
 import { 
   Appointment, 
   Patient, 

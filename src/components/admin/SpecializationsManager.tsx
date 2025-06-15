@@ -22,7 +22,7 @@ import {
 import Grid from '@mui/material/Grid';
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 import { Specialization } from '../../types';
-import { getSpecializations, createSpecialization, updateSpecialization, deleteSpecialization } from '../../services/api';
+import { getSpecializations, createSpecialization, updateSpecialization, deleteSpecialization } from '../../services/patientAPI';
 
 const SpecializationsManager: React.FC = () => {
   const [specializations, setSpecializations] = useState<Specialization[]>([]);

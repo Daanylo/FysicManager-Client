@@ -11,8 +11,9 @@ import {
   Paper,
   CircularProgress
 } from '@mui/material';
-import { getPractices, getSpecializations } from '../services/api';
-import { Practice, Specialization } from '../types';
+import { getPractices, getSpecializations } from '../services/patientAPI';
+import { Practice } from '../types/Practice';
+import { Specialization } from '../types/Specialization';
 
 interface FilterBarProps {
   onPracticesChange: (practices: number[]) => void;

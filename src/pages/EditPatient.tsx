@@ -13,33 +13,27 @@ import {
   Divider
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
-import { getPatient, updatePatient } from '../services/api';
-import { Patient } from '../types';
+import { getPatient, updatePatient } from '../services/patientAPI';
+import { Patient } from '../types/Patient';
 
 // Interface for the form data matching the Patient model in the API
 interface PatientFormData extends Omit<Patient, 'id' | 'appointments'> {}
 
 const EditPatient: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const patientId = parseInt(id || '0', 10);
+  const patientId = id || '';
   
   const [formData, setFormData] = useState<PatientFormData>({
-    name: '',
-    surname: '',
+    firstName: '',
+    lastName: '',
     email: '',
-    phone: '',
+    phoneNumber: '',
     address: '',
     city: '',
-    zipCode: '',
+    postalCode: '',
     country: '',
     dateOfBirth: new Date().toISOString().split('T')[0],
-    medicalHistory: '',
-    insuranceProvider: '',
-    insuranceNumber: '',
     bsn: '',
-    emergencyContactName: '',
-    emergencyContactPhone: '',
-    registrationDate: new Date().toISOString()
   });
   
   const [errors, setErrors] = useState<Partial<PatientFormData>>({});
@@ -51,11 +45,6 @@ const EditPatient: React.FC = () => {
   // Load patient data
   useEffect(() => {
     const loadPatient = async () => {
-      if (patientId <= 0) {
-        setErrorMessage('Invalid patient ID');
-        setIsLoading(false);
-        return;
-      }
       
       try {
         const patient = await getPatient(patientId);
@@ -66,22 +55,16 @@ const EditPatient: React.FC = () => {
           : '';
           
         setFormData({
-          name: patient.name || '',
-          surname: patient.surname || '',
+          firstName: patient.firstName || '',
+          lastName: patient.lastName || '',
           email: patient.email || '',
-          phone: patient.phone || '',
+          phoneNumber: patient.phoneNumber || '',
           address: patient.address || '',
           city: patient.city || '',
-          zipCode: patient.zipCode || '',
+          postalCode: patient.postalCode || '',
           country: patient.country || '',
           dateOfBirth: formattedDateOfBirth,
-          medicalHistory: patient.medicalHistory || '',
-          insuranceProvider: patient.insuranceProvider || '',
-          insuranceNumber: patient.insuranceNumber || '',
           bsn: patient.bsn || '',
-          emergencyContactName: patient.emergencyContactName || '',
-          emergencyContactPhone: patient.emergencyContactPhone || '',
-          registrationDate: patient.registrationDate || new Date().toISOString()
         });
       } catch (error) {
         console.error('Error loading patient:', error);
@@ -100,7 +83,7 @@ const EditPatient: React.FC = () => {
 
     // Required fields validation
     const requiredFields: Array<keyof PatientFormData> = [
-      'name', 'surname', 'email', 'phone', 'dateOfBirth'
+      'firstName', 'lastName'
     ];
     
     requiredFields.forEach(field => {
@@ -199,10 +182,10 @@ const EditPatient: React.FC = () => {
                     fullWidth
                     label="First Name"
                     name="name"
-                    value={formData.name}
+                    value={formData.firstName}
                     onChange={handleChange}
-                    error={!!errors.name}
-                    helperText={errors.name}
+                    error={!!errors.firstName}
+                    helperText={errors.firstName}
                     required
                     disabled={isSubmitting}
                     size="small"
@@ -213,10 +196,10 @@ const EditPatient: React.FC = () => {
                     fullWidth
                     label="Last Name"
                     name="surname"
-                    value={formData.surname}
+                    value={formData.lastName}
                     onChange={handleChange}
-                    error={!!errors.surname}
-                    helperText={errors.surname}
+                    error={!!errors.lastName}
+                    helperText={errors.lastName}
                     required
                     disabled={isSubmitting}
                     size="small"
@@ -243,10 +226,10 @@ const EditPatient: React.FC = () => {
                   fullWidth
                   label="Phone"
                   name="phone"
-                  value={formData.phone}
+                  value={formData.phoneNumber}
                   onChange={handleChange}
-                  error={!!errors.phone}
-                  helperText={errors.phone}
+                  error={!!errors.phoneNumber}
+                  helperText={errors.phoneNumber}
                   required
                   disabled={isSubmitting}
                   size="small"
@@ -310,10 +293,10 @@ const EditPatient: React.FC = () => {
                     fullWidth
                     label="Zip Code"
                     name="zipCode"
-                    value={formData.zipCode}
+                    value={formData.postalCode}
                     onChange={handleChange}
-                    error={!!errors.zipCode}
-                    helperText={errors.zipCode}
+                    error={!!errors.postalCode}
+                    helperText={errors.postalCode}
                     disabled={isSubmitting}
                     size="small"
                     margin="dense"
@@ -336,105 +319,23 @@ const EditPatient: React.FC = () => {
             </div>
             
             <Divider sx={{ my: 0.5 }} />
-            
-            {/* Medical Information Section */}
+            {/* BSN Section */}
             <div>
               <Typography variant="subtitle1" sx={{ mb: 1, fontSize: '0.95rem', fontWeight: 'bold' }}>
-                Medical Information
+                BSN (Burgerservicenummer)
               </Typography>
-              <Stack spacing={1.5}>
-                <TextField
-                  fullWidth
-                  label="Medical History"
-                  name="medicalHistory"
-                  value={formData.medicalHistory}
-                  onChange={handleChange}
-                  error={!!errors.medicalHistory}
-                  helperText={errors.medicalHistory}
-                  multiline
-                  minRows={2}
-                  disabled={isSubmitting}
-                  size="small"
-                  margin="dense"
-                />
-                
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-                  <TextField
-                    fullWidth
-                    label="Insurance Provider"
-                    name="insuranceProvider"
-                    value={formData.insuranceProvider}
-                    onChange={handleChange}
-                    error={!!errors.insuranceProvider}
-                    helperText={errors.insuranceProvider}
-                    disabled={isSubmitting}
-                    size="small"
-                    margin="dense"
-                  />
-                  
-                  <TextField
-                    fullWidth
-                    label="Insurance Number"
-                    name="insuranceNumber"
-                    value={formData.insuranceNumber}
-                    onChange={handleChange}
-                    error={!!errors.insuranceNumber}
-                    helperText={errors.insuranceNumber}
-                    disabled={isSubmitting}
-                    size="small"
-                    margin="dense"
-                  />
-                </Stack>
-                
-                <TextField
-                  fullWidth
-                  label="BSN Number"
-                  name="bsn"
-                  value={formData.bsn}
-                  onChange={handleChange}
-                  error={!!errors.bsn}
-                  helperText={errors.bsn}
-                  disabled={isSubmitting}
-                  size="small"
-                  margin="dense"
-                />
-              </Stack>
-            </div>
-            
-            <Divider sx={{ my: 0.5 }} />
-            
-            {/* Emergency Contact */}
-            <div>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontSize: '0.95rem', fontWeight: 'bold' }}>
-                Emergency Contact
-              </Typography>
-              <Stack spacing={1.5}>
-                <TextField
-                  fullWidth
-                  label="Emergency Contact Name"
-                  name="emergencyContactName"
-                  value={formData.emergencyContactName}
-                  onChange={handleChange}
-                  error={!!errors.emergencyContactName}
-                  helperText={errors.emergencyContactName}
-                  disabled={isSubmitting}
-                  size="small"
-                  margin="dense"
-                />
-                
-                <TextField
-                  fullWidth
-                  label="Emergency Contact Phone"
-                  name="emergencyContactPhone"
-                  value={formData.emergencyContactPhone}
-                  onChange={handleChange}
-                  error={!!errors.emergencyContactPhone}
-                  helperText={errors.emergencyContactPhone}
-                  disabled={isSubmitting}
-                  size="small"
-                  margin="dense"
-                />
-              </Stack>
+              <TextField
+                fullWidth
+                label="BSN"
+                name="bsn"
+                value={formData.bsn}
+                onChange={handleChange}
+                error={!!errors.bsn}
+                helperText={errors.bsn}
+                disabled={isSubmitting}
+                size="small"
+                margin="dense"
+              />
             </div>
             
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>

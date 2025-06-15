@@ -34,20 +34,19 @@ import {
   Add as AddIcon,
   Schedule as ScheduleIcon
 } from '@mui/icons-material';
-import { Therapist, Practice, Specialization, WorkShift } from '../../types';
+import { Therapist } from '../../types/Therapist';
+import { Appointment } from '../../types/Appointment';
+import { Workshift } from '../../types/Workshift';
+import { Practice } from '../../types/Practice';
 import { 
-  getTherapists, 
+  getTherapist,
   createTherapist, 
   updateTherapist, 
   deleteTherapist,
-  getPractices,
-  getWorkShiftsByTherapist,
-  createWorkShift,
-  updateWorkShift,
-  deleteWorkShift
-} from '../../services/api';
+} from '../../services/therapistAPI';
 import { format, parseISO } from 'date-fns';
 import axios from 'axios';
+import { Specialization } from '../../types/Specialization';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -92,18 +91,17 @@ const TherapistsManager: React.FC = () => {
   const [therapistDialogOpen, setTherapistDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentTherapist, setCurrentTherapist] = useState<Therapist>({
-    id: 0,
+    id: '',
     name: '',
     email: '',
-    phone: '',
-    practiceId: 0
+    phoneNumber: ''
   });
   
   // Work shifts state
-  const [workShifts, setWorkShifts] = useState<WorkShift[]>([]);
+  const [workShifts, setWorkShifts] = useState<Workshift[]>([]);
   const [shiftDialogOpen, setShiftDialogOpen] = useState(false);
   const [isEditingShift, setIsEditingShift] = useState(false);
-  const [currentWorkShift, setCurrentWorkShift] = useState<WorkShift>({
+  const [currentWorkShift, setCurrentWorkShift] = useState<Workshift>({
     id: 0,
     therapistId: 0,
     practiceId: 0,
@@ -130,8 +128,8 @@ const TherapistsManager: React.FC = () => {
     try {
       setLoading(true);
       const [therapistsData, practicesData] = await Promise.all([
-        getTherapists(),
-        getPractices()
+        setTherapists(),
+        setPractices()
       ]);
       
       setTherapists(therapistsData);
@@ -316,7 +314,7 @@ const TherapistsManager: React.FC = () => {
     setCurrentWorkShift({
       id: 0,
       therapistId: selectedTherapist.id,
-      practiceId: selectedTherapist.practiceId,
+      practiceId: selectedTherapist.practices,
       startDateTime: startDate,
       endDateTime: endDate
     });
@@ -324,7 +322,7 @@ const TherapistsManager: React.FC = () => {
     setShiftDialogOpen(true);
   };
 
-  const openEditShiftDialog = (shift: WorkShift) => {
+  const openEditShiftDialog = (shift: Workshift) => {
     setCurrentWorkShift({ ...shift });
     setIsEditingShift(true);
     setShiftDialogOpen(true);
@@ -383,7 +381,7 @@ const TherapistsManager: React.FC = () => {
           ...currentWorkShift,
           therapistId: selectedTherapist.id
         };
-        await createWorkShift(workShiftToCreate);
+        await currentWorkShift(workShiftToCreate);
         setSnackbar({
           open: true,
           message: 'Work shift created successfully',
@@ -461,7 +459,7 @@ const TherapistsManager: React.FC = () => {
       if (!selectedTherapist) {
         throw new Error('No therapist selected');
       }
-      await deleteWorkShift(id, selectedTherapist.id);
+      await setWorkShifts(id, selectedTherapist.id);
       setSnackbar({
         open: true,
         message: 'Work shift deleted successfully',
@@ -538,7 +536,7 @@ const TherapistsManager: React.FC = () => {
                   <TableCell>{therapist.name}</TableCell>
                   <TableCell>{therapist.email}</TableCell>
                   <TableCell>{therapist.phone}</TableCell>
-                  <TableCell>{getPracticeName(therapist.practiceId)}</TableCell>
+                  <TableCell>{getPracticeName(therapist.practices)}</TableCell>
                   <TableCell align="right">
                     <IconButton onClick={() => handleSelectTherapist(therapist)} color="info" title="Manage Work Shifts">
                       <ScheduleIcon />
@@ -674,7 +672,7 @@ const TherapistsManager: React.FC = () => {
                 <FormControl fullWidth required>
                   <InputLabel>Practice</InputLabel>
                   <Select
-                    value={currentTherapist.practiceId || ''}
+                    value={currentTherapist.practices || ''}
                     label="Practice"
                     onChange={handlePracticeChange}
                   >

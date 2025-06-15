@@ -3,12 +3,13 @@ import { Box, Paper, Typography, Divider, CircularProgress, IconButton } from '@
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Therapist, Appointment, TimeSlot, Patient, AppointmentStatus, AppointmentType, WorkShift } from '../types';
-import { getTherapist, getAppointmentsByTherapist, getAppointmentsByDate, getPatients, deleteAppointment, getWorkShiftsByTherapist } from '../services/api';
+import { getTherapist, getTherapistWorkshifts } from '../services/therapistAPI';
+import { getAllPatients } from '../services/patientAPI';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { format, parseISO, addMinutes } from 'date-fns';
 
 interface ScheduleViewProps {
-  selectedTherapistIds: number[];
+  selectedTherapists: Therapist[];
   selectedDate: Date;
 }
 
@@ -17,7 +18,7 @@ const SCHEDULE_START_HOUR = 6; // 6:00
 const SCHEDULE_END_HOUR = 21; // 21:00
 const HOUR_HEIGHT = 60; // 60px per hour
 
-const ScheduleView: React.FC<ScheduleViewProps> = ({ selectedTherapistIds, selectedDate }) => {
+const ScheduleView: React.FC<ScheduleViewProps> = ({ selectedTherapists, selectedDate }) => {
   const [therapists, setTherapists] = useState<Therapist[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [workShifts, setWorkShifts] = useState<WorkShift[]>([]);
@@ -42,7 +43,7 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({ selectedTherapistIds, selec
   useEffect(() => {
     const loadPatients = async () => {
       try {
-        const patientData = await getPatients();
+        const patientData = await getAllPatients();
         setPatients(patientData);
       } catch (error) {
         console.error('Error loading patients:', error);
@@ -56,21 +57,21 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({ selectedTherapistIds, selec
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        if (selectedTherapistIds.length > 0) {
+        if (selectedTherapists.length > 0) {
           // Always load all selected therapists first
           const therapistsData = await Promise.all(
-            selectedTherapistIds.map(id => getTherapist(id))
+            selectedTherapists.map(therapist => getTherapist(therapist.id))
           );
           setTherapists(therapistsData);
-          console.log('Loaded selected therapists:', therapistsData.map(t => t.name));
+          console.log('Loaded selected therapists:', therapistsData.map((t) => t.name));
           
           // Load work shifts for all therapists
           const allWorkShifts = await Promise.all(
-            selectedTherapistIds.map(async (id) => {
+            selectedTherapists.map(async (therapist) => {
               try {
-                return await getWorkShiftsByTherapist(id);
+                return await getTherapistWorkshifts(therapist.id);
               } catch (error) {
-                console.error(`Error loading work shifts for therapist ${id}:`, error);
+                console.error(`Error loading work shifts for therapist ${therapist.name}:`, error);
                 return [];
               }
             })
@@ -81,9 +82,10 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({ selectedTherapistIds, selec
           
           // Filter work shifts for the selected date
           const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
-          const filteredWorkShifts = flattenedWorkShifts.filter(shift => {
-            const shiftStartDate = format(new Date(shift.startDateTime), 'yyyy-MM-dd');
-            const shiftEndDate = format(new Date(shift.endDateTime), 'yyyy-MM-dd');
+          const filteredWorkShifts = flattenedWorkShifts.filter((shift) => {
+            if (!shift.startTime || !shift.endTime) return false;
+            const shiftStartDate = format(new Date(shift.startTime), 'yyyy-MM-dd');
+            const shiftEndDate = format(new Date(shift.endTime), 'yyyy-MM-dd');
             return shiftStartDate === selectedDateStr || shiftEndDate === selectedDateStr;
           });
           
@@ -100,8 +102,8 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({ selectedTherapistIds, selec
             console.log('Appointments fetched by date:', appointmentsData);
             
             // Filter for the selected therapists
-            const filteredAppointments = appointmentsData.filter(app => 
-              selectedTherapistIds.includes(app.therapistId)
+            const filteredAppointments = appointmentsData.filter((app: { therapistId: number; }) => 
+              selectedTherapists.includes(app.therapistId)
             );
             
             console.log('Filtered appointments:', filteredAppointments);
@@ -113,12 +115,12 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({ selectedTherapistIds, selec
             // If getting by date fails, try getting appointments for each therapist
             const allAppointments: Appointment[] = [];
             
-            for (const therapistId of selectedTherapistIds) {
+            for (const therapistId of selectedTherapists.map(t => t.id)) {
               try {
                 const therapistAppointments = await getAppointmentsByTherapist(therapistId);
                 
                 // Filter by date
-                const filteredAppointments = therapistAppointments.filter(app => {
+                const filteredAppointments = therapistAppointments.filter((app: { startTime: string | number | Date; }) => {
                   const appDate = new Date(app.startTime);
                   return (
                     appDate.getFullYear() === selectedDate.getFullYear() &&
@@ -150,7 +152,7 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({ selectedTherapistIds, selec
     };
 
     fetchData();
-  }, [selectedTherapistIds, selectedDate]); // Don't include patients and therapists here
+  }, [selectedTherapists, selectedDate]); // Don't include patients and therapists here
 
   // Separate effect for appointment update messages
   useEffect(() => {
@@ -349,21 +351,21 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({ selectedTherapistIds, selec
   };
 
   // Handler to delete an appointment
-  const handleDeleteAppointment = async (appointmentId: number) => {
+  const handleDeleteAppointment = async (appointment: Appointment) => {
     // Confirmation dialog
     if (window.confirm('Are you sure you want to delete this appointment?')) {
       try {
-        await deleteAppointment(appointmentId);
+        await deleteAppointment(appointment.id);
         // Remove appointment from local state
-        setAppointments(prev => prev.filter(app => app.id !== appointmentId));
-        console.log(`Appointment ${appointmentId} deleted successfully.`);
+        setAppointments(prev => prev.filter(app => app.id !== appointment.id));
+        console.log(`Appointment ${appointment.id} deleted successfully.`);
         
         // If this is an edit page in a popup window, close it after deletion
-        if (window.opener && window.location.pathname.includes(`/appointments/edit/${appointmentId}`)) {
+        if (window.opener && window.location.pathname.includes(`/appointments/edit/${appointment.id}`)) {
           window.close();
         }
       } catch (error) {
-        console.error(`Error deleting appointment ${appointmentId}:`, error);
+        console.error(`Error deleting appointment ${appointment.id}:`, error);
         // Optionally show an error message to the user
         alert('Failed to delete appointment. Please try again.');
       }
@@ -519,7 +521,7 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({ selectedTherapistIds, selec
       );
     }
 
-    if (selectedTherapistIds.length === 0) {
+    if (selectedTherapists.length === 0) {
       return (
         <Box sx={{ 
           display: 'flex', 

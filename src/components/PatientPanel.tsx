@@ -25,7 +25,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { Patient, Appointment } from '../types';
-import { searchPatients, getPatient, getAppointmentsByPatient, deleteAppointment } from '../services/api';
+import { searchPatients, getPatient, getAppointmentsByPatient, deleteAppointment } from '../services/patientAPI';
 import { format, addMinutes } from 'date-fns';
 
 interface PatientPanelProps {

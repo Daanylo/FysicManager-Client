@@ -11,7 +11,7 @@ import EditPatient from './pages/EditPatient';
 import AppointmentEditPage from './pages/AppointmentEditPage';
 import CreateAppointmentPage from './pages/CreateAppointmentPage';
 import AdminPage from './pages/AdminPage';
-import { getTherapists, getTherapistsByPractice } from './services/api';
+import { getTherapists, getTherapistsByPractice } from './services/patientAPI';
 import './App.css';
 
 const theme = createTheme({

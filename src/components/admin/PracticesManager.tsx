@@ -25,7 +25,7 @@ import {
 import Grid from '@mui/material/Grid';
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 import { Practice } from '../../types';
-import { getPractices, createPractice, updatePractice, deletePractice } from '../../services/api';
+import { getPractices, createPractice, updatePractice, deletePractice } from '../../services/patientAPI';
 
 const PracticesManager: React.FC = () => {
   const [practices, setPractices] = useState<Practice[]>([]);
