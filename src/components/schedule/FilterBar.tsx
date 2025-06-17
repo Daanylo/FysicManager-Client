@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Box, 
   TextField, 
@@ -15,8 +15,8 @@ import {
 import { Practice } from '../../types/Practice';
 import { Specialization } from '../../types/Specialization';
 import { Therapist } from '../../types/Therapist';
-import { getAllPractices } from '../../services/practiceAPI';
-import { getAllSpecializations } from '../../services/specializationAPI';
+import { getAllPractices, getPracticeTherapists } from '../../services/practiceAPI';
+import { getAllSpecializations, getSpecializationTherapists } from '../../services/specializationAPI';
 import { getAllTherapists } from '../../services/therapistAPI';
 
 interface FilterBarProps {
@@ -62,51 +62,100 @@ const FilterBar: React.FC<FilterBarProps> = ({ onTherapistsSelected, onFilteredT
       }
     };
 
-    fetchData();
-  }, []);
+    fetchData();  }, []);
+
+  // Helper function to update parent component with selected therapists
+  const updateSelectedTherapists = useCallback((therapistIds: string[]) => {
+    if (onTherapistsSelected) {
+      const selected = therapists.filter(t => therapistIds.includes(t.id));
+      onTherapistsSelected(selected);
+    }
+  }, [onTherapistsSelected, therapists]);
+
   // Filter therapists when selections change
   useEffect(() => {
-    if (therapists.length === 0) return;
+    const filterTherapists = async () => {
+      if (therapists.length === 0) return;
 
-    let filtered = [...therapists];
+      let filtered = [...therapists];
 
-    if (selectedPracticeIds.length > 0) {
-      filtered = filtered.filter(therapist => 
-        therapist.practices?.some(practice => selectedPracticeIds.includes(practice.id))
-      );
-    }
+      // Filter by practices using getPracticeTherapists API
+      if (selectedPracticeIds.length > 0) {
+        try {
+          // Fetch therapists for all selected practices
+          const practiceTherapistPromises = selectedPracticeIds.map(practiceId => 
+            getPracticeTherapists(practiceId)
+          );
+          
+          const practiceTherapistResults = await Promise.all(practiceTherapistPromises);
+          
+          // Flatten the results and get unique therapist IDs
+          const practiceTherapistIds = new Set(
+            practiceTherapistResults.flat().map(therapist => therapist.id)
+          );
+          
+          // Filter therapists to only include those found in the selected practices
+          filtered = filtered.filter(therapist => 
+            practiceTherapistIds.has(therapist.id)
+          );
+        } catch (error) {
+          console.error("Failed to fetch therapists for selected practices:", error);
+          // Fall back to empty array if API call fails
+          filtered = [];
+        }
+      }
 
-    if (selectedSpecializationIds.length > 0) {
-      filtered = filtered.filter(therapist =>
-        therapist.specializations?.some(spec => selectedSpecializationIds.includes(spec.id))
-      );
-    }
+      // Filter by specializations using getSpecializationTherapists API
+      if (selectedSpecializationIds.length > 0) {
+        try {
+          // Fetch therapists for all selected specializations
+          const specializationTherapistPromises = selectedSpecializationIds.map(specializationId => 
+            getSpecializationTherapists(specializationId)
+          );
+          
+          const specializationTherapistResults = await Promise.all(specializationTherapistPromises);
+          
+          // Flatten the results and get unique therapist IDs
+          const specializationTherapistIds = new Set(
+            specializationTherapistResults.flat().map(therapist => therapist.id)
+          );
+          
+          // Filter therapists to only include those found in the selected specializations
+          filtered = filtered.filter(therapist => 
+            specializationTherapistIds.has(therapist.id)
+          );
+        } catch (error) {
+          console.error("Failed to fetch therapists for selected specializations:", error);
+          // Fall back to empty array if API call fails
+          filtered = [];
+        }
+      }
 
-    setFilteredTherapists(filtered);
+      setFilteredTherapists(filtered);
+    };
 
-    // Notify parent component about filtered therapists
+    filterTherapists();
+  }, [selectedPracticeIds, selectedSpecializationIds, therapists]);
+
+  // Separate useEffect to handle parent notifications
+  useEffect(() => {
     if (onFilteredTherapistsChange) {
-      onFilteredTherapistsChange(filtered);
+      onFilteredTherapistsChange(filteredTherapists);
     }
+  }, [filteredTherapists, onFilteredTherapistsChange]);
 
-    // Update selected therapists if they're not in filtered list anymore
+  // Separate useEffect to handle selected therapist validation
+  useEffect(() => {
+    if (filteredTherapists.length === 0 && therapists.length > 0) return;
+    
     const validSelectedTherapists = selectedTherapistIds.filter(
-      id => filtered.some(t => t.id === id)
+      id => filteredTherapists.some(t => t.id === id)
     );
     
     if (validSelectedTherapists.length !== selectedTherapistIds.length) {
       setSelectedTherapistIds(validSelectedTherapists);
       updateSelectedTherapists(validSelectedTherapists);
-    }
-  }, [selectedPracticeIds, selectedSpecializationIds, therapists, selectedTherapistIds, onFilteredTherapistsChange]);
-
-  // Helper function to update parent component with selected therapists
-  const updateSelectedTherapists = (therapistIds: string[]) => {
-    if (onTherapistsSelected) {
-      const selected = therapists.filter(t => therapistIds.includes(t.id));
-      onTherapistsSelected(selected);
-    }
-  };
+    }  }, [filteredTherapists, selectedTherapistIds, updateSelectedTherapists, therapists.length]);
 
   // Handle practice selection
   const handlePracticeChange = (event: SelectChangeEvent<string[]>) => {

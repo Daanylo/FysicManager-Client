@@ -5,13 +5,18 @@ const API_BASE = "http://localhost:5003/api/specialization";
 
 // Get all specializations
 export async function getAllSpecializations() {
-    const response = await axios.get<Specialization[]>(API_BASE);
+    const response = await axios.get<Specialization[]>(`${API_BASE}/all`);
     return response.data;
 }
 
 // Get a single specialization by ID
 export async function getSpecialization(id: string) {
     const response = await axios.get<Specialization>(`${API_BASE}/${id}`);
+    return response.data;
+}
+
+export async function getSpecializationTherapists(id: string) {
+    const response = await axios.get<{ id: string; name: string }[]>(`${API_BASE}/${id}/therapists`);
     return response.data;
 }
 
