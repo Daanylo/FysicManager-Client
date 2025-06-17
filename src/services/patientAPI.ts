@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Patient } from "../types/Patient";
+import { Appointment } from "../types/Appointment";
 
 const API_BASE = "http://localhost:5003/api/patient";
 
@@ -11,8 +12,16 @@ export async function getPatient(id: string) {
     return response.data;
 }
 
+export async function searchPatient(searchQuery: string) {
+    const response = await axios.get<Patient[]>(`${API_BASE}/search`, {
+        params: { searchQuery: searchQuery }
+    });
+    console.log('API response data:', response.data); // Debug log
+    return response.data;
+}
+
 export async function getPatientAppointments(id: string) {
-    const response = await axios.get<Patient>(`${API_BASE}/${id}/appointments`);
+    const response = await axios.get<Appointment[]>(`${API_BASE}/${id}/appointments`);
     return response.data;
 }
 

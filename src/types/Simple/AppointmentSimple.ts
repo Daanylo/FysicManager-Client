@@ -12,6 +12,5 @@ export interface AppointmentSimple {
     time: string;
     duration: number;
     notes: string;
-    // Optional patient object for UI display
     patient?: PatientSimple;
 }

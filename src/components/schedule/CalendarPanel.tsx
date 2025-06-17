@@ -5,10 +5,18 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 
 interface CalendarPanelProps {
   onDateSelected?: (date: Date | null) => void;
+  selectedDate?: Date | null;
 }
 
-const CalendarPanel: React.FC<CalendarPanelProps> = ({ onDateSelected }) => {
-  const [selectedDate, setSelectedDate] = React.useState<Date | null>(new Date());
+const CalendarPanel: React.FC<CalendarPanelProps> = ({ onDateSelected, selectedDate: propSelectedDate }) => {
+  const [selectedDate, setSelectedDate] = React.useState<Date | null>(propSelectedDate || new Date());
+
+  // Sync internal state with prop changes
+  React.useEffect(() => {
+    if (propSelectedDate) {
+      setSelectedDate(propSelectedDate);
+    }
+  }, [propSelectedDate]);
 
   const handleDateChange = (newDate: Date | null) => {
     setSelectedDate(newDate);

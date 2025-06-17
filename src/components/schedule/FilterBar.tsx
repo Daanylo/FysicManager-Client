@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Box, 
-  TextField, 
   MenuItem, 
   CircularProgress, 
   Typography, 
@@ -188,14 +187,14 @@ const FilterBar: React.FC<FilterBarProps> = ({ onTherapistsSelected, onFilteredT
   return (
     <Box sx={{ p: 2, display: 'flex', gap: 2, backgroundColor: 'background.paper', flexWrap: 'wrap' }}>
       <FormControl sx={{ minWidth: 200 }}>
-        <InputLabel id="practices-label">Practices</InputLabel>
+        <InputLabel id="practices-label">Praktijken</InputLabel>
         <Select
           labelId="practices-label"
           id="practices-select"
           multiple
           value={selectedPracticeIds}
           onChange={handlePracticeChange}
-          input={<OutlinedInput id="select-multiple-practices" label="Practices" />}
+          input={<OutlinedInput id="select-multiple-practices" label="Praktijken" />}
           renderValue={(selected) => (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
               {selected.map((value) => {
@@ -218,14 +217,14 @@ const FilterBar: React.FC<FilterBarProps> = ({ onTherapistsSelected, onFilteredT
       </FormControl>
       
       <FormControl sx={{ minWidth: 200 }}>
-        <InputLabel id="specializations-label">Specializations</InputLabel>
+        <InputLabel id="specializations-label">Specialisaties</InputLabel>
         <Select
           labelId="specializations-label"
           id="specializations-select"
           multiple
           value={selectedSpecializationIds}
           onChange={handleSpecializationChange}
-          input={<OutlinedInput id="select-multiple-specializations" label="Specializations" />}
+          input={<OutlinedInput id="select-multiple-specializations" label="Specialisaties" />}
           renderValue={(selected) => (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
               {selected.map((value) => {
@@ -248,14 +247,14 @@ const FilterBar: React.FC<FilterBarProps> = ({ onTherapistsSelected, onFilteredT
       </FormControl>
       
       <FormControl sx={{ minWidth: 200 }}>
-        <InputLabel id="therapists-label">Therapists</InputLabel>
+        <InputLabel id="therapists-label">Therapeuten</InputLabel>
         <Select
           labelId="therapists-label"
           id="therapists-select"
           multiple
           value={selectedTherapistIds}
           onChange={handleTherapistChange}
-          input={<OutlinedInput id="select-multiple-therapists" label="Therapists" />}
+          input={<OutlinedInput id="select-multiple-therapists" label="Therapeuten" />}
           renderValue={(selected) => (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
               {selected.map((value) => {
