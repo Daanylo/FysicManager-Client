@@ -25,6 +25,7 @@ interface SchedulePanelProps {
   selectedDate: Date;
   selectedTherapists: Therapist[];
   filteredTherapists?: Therapist[];
+  refreshTrigger?: number; // Optional prop to trigger data refresh
 }
 
 interface TherapistScheduleData {
@@ -41,9 +42,11 @@ interface TimeSlot {
   practiceColor: string;
   textColor: string;
   appointment?: AppointmentSimple;
+  workshift?: WorkshiftSimple;
+  therapist: Therapist;
 }
 
-const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedTherapists, filteredTherapists = [] }) => {
+const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedTherapists, filteredTherapists = [], refreshTrigger }) => {
   const theme = useTheme();
   const [scheduleData, setScheduleData] = useState<Map<string, TherapistScheduleData>>(new Map());
   const [loading, setLoading] = useState<boolean>(false);
@@ -142,7 +145,7 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
     return () => {
       abortController.abort();
     };
-  }, [selectedDate, therapistsToShow]); // Use the actual dependencies instead of dataKey// Create time slots from 6:00 to 22:00 with 25-minute intervals
+  }, [selectedDate, therapistsToShow, refreshTrigger]); // Add refreshTrigger to dependencies// Create time slots from 6:00 to 22:00 with 25-minute intervals
   const timeSlots = useMemo(() => {
     const startTime = addMinutes(startOfDay(selectedDate), 6 * 60); // 6:00 AM
     const endTime = addMinutes(startOfDay(selectedDate), 22 * 60); // 10:00 PM
@@ -178,15 +181,15 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
       pixelPosition,
       time: format(now, 'HH:mm')
     };
-  }, [selectedDate, timeSlots.length]);
-  // Create schedule for a therapist
+  }, [selectedDate, timeSlots.length]);  // Create schedule for a therapist
   const createTherapistTimeSlots = (therapistData: TherapistScheduleData): TimeSlot[] => {
-    const { workshifts, appointments } = therapistData;
+    const { workshifts, appointments, therapist } = therapistData;
 
     return timeSlots.map(date => {
       let isWorkShift = false;
       let practiceColor = theme.palette.background.default; // Default background for non-workshift
       let textColor = theme.palette.text.primary;
+      let currentWorkshift: WorkshiftSimple | undefined;
 
       // Check if this time slot is in the therapist's workshift
       for (const shift of workshifts) {
@@ -196,6 +199,7 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
             const shiftEnd = parseISO(shift.endTime);
             if (isWithinInterval(date, { start: shiftStart, end: addMinutes(shiftEnd, -1) })) {
               isWorkShift = true;
+              currentWorkshift = shift;
 
               // Use practice color if available, otherwise use a default work color
               if (shift.practice?.color) {
@@ -232,8 +236,48 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
         practiceColor,
         textColor,
         appointment,
+        workshift: currentWorkshift,
+        therapist,
       };
     });
+  };
+
+  const handleTimeSlotClick = (slot: TimeSlot) => {
+    // Only allow clicking on empty workshift slots (not appointments)
+    if (!slot.appointment && slot.isWorkShift && slot.workshift) {
+      const timeString = format(slot.time, 'yyyy-MM-dd HH:mm:ss');
+      const therapistId = slot.therapist.id;
+      const therapistName = encodeURIComponent(slot.therapist.name || '');
+      const practiceId = slot.workshift.practice?.id || '';
+      const practiceName = encodeURIComponent(slot.workshift.practice?.name || '');
+      
+      // Create URL parameters for the appointment creation form
+      const params = new URLSearchParams({
+        time: timeString,
+        therapistId: therapistId,
+        therapistName: therapistName,
+        practiceId: practiceId,
+        practiceName: practiceName,
+        duration: '25' // Default duration matching the time slot interval
+      });
+      
+      // Open a new popup window for appointment creation
+      // You'll need to create this appointment creation page
+      const appointmentUrl = `/create-appointment?${params.toString()}`;
+      
+      const popup = window.open(
+        appointmentUrl,
+        'createAppointment',
+        'width=800,height=600,scrollbars=yes,resizable=yes,status=yes,location=yes,toolbar=no,menubar=no'
+      );
+      
+      if (popup) {
+        popup.focus();
+      } else {
+        // Fallback if popup was blocked
+        alert('Please enable popups for this site to create appointments.');
+      }
+    }
   };
 
   // Render "no therapists selected" state
@@ -416,18 +460,42 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
                             : (slot.appointment ? theme.palette.secondary.light : slot.practiceColor),
                           color: hasError
                             ? theme.palette.text.disabled
-                            : (slot.appointment ? theme.palette.getContrastText(theme.palette.info.light) : slot.textColor),
-                          display: 'flex',
+                            : (slot.appointment ? theme.palette.getContrastText(theme.palette.info.light) : slot.textColor),                          display: 'flex',
                           flexDirection: 'column',
                           justifyContent: 'center',
-                          cursor: slot.appointment ? 'pointer' : 'default',
+                          cursor: hasError 
+                            ? 'default' 
+                            : slot.appointment 
+                              ? 'pointer' 
+                              : slot.isWorkShift 
+                                ? 'pointer' 
+                                : 'default',
                           overflow: 'hidden',
                           boxSizing: 'border-box',
-                          '&:hover': slot.appointment ? {
-                            backgroundColor: theme.palette.secondary.dark,
-                            color: theme.palette.getContrastText(theme.palette.info.dark)
-                          } : {}
+                          transition: 'all 0.2s ease-in-out',
+                          '&:hover': hasError 
+                            ? {} 
+                            : slot.appointment 
+                              ? {
+                                  backgroundColor: theme.palette.secondary.dark,
+                                  color: theme.palette.getContrastText(theme.palette.info.dark),
+                                  transform: 'scale(1.02)',
+                                  boxShadow: theme.shadows[2],
+                                }
+                              : slot.isWorkShift 
+                                ? {
+                                    backgroundColor: slot.workshift?.practice?.color 
+                                      ? `${slot.workshift.practice.color}60` 
+                                      : theme.palette.primary.main,
+                                    color: theme.palette.getContrastText(
+                                      slot.workshift?.practice?.color || theme.palette.primary.main
+                                    ),
+                                    transform: 'scale(1.02)',
+                                    boxShadow: theme.shadows[2],
+                                  }
+                                : {}
                         }}
+                        onClick={() => handleTimeSlotClick(slot)} // Handle time slot click
                       >                        {slot.appointment && !hasError && (
                           <Box sx={{ 
                             overflow: 'hidden',
@@ -438,7 +506,8 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
                             flexDirection: 'column',
                             justifyContent: 'center',
                             height: '100%'
-                          }}>                            <Typography variant="body2" sx={{ 
+                          }}>
+                            <Typography variant="body2" sx={{ 
                               fontWeight: 'bold', 
                               fontSize: '0.65rem', 
                               lineHeight: 1.1,
@@ -459,6 +528,29 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
                                 `${slot.appointment.patient?.firstName || ''} ${slot.appointment.patient?.lastName || ''}` :
                                 `Patient ${slot.appointment.patientId ? '#' + slot.appointment.patientId.substring(0, 4) : ''}`
                               }
+                            </Typography>
+                          </Box>
+                        )}
+                        
+                        {!slot.appointment && slot.isWorkShift && !hasError && (
+                          <Box sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: '100%',
+                            width: '100%',
+                            opacity: 0.6,
+                            '&:hover': {
+                              opacity: 1,
+                            }
+                          }}>
+                            <Typography variant="caption" sx={{ 
+                              fontSize: '0.6rem',
+                              fontWeight: 'bold',
+                              textAlign: 'center',
+                              color: 'inherit'
+                            }}>
+                              Click to create appointment
                             </Typography>
                           </Box>
                         )}

@@ -7,6 +7,17 @@ import { AppointmentSimple } from "../types/Simple/AppointmentSimple";
 
 const API_BASE = "http://localhost:5003/api/appointment";
 
+// Interface for creating appointments with simple IDs
+export interface CreateAppointmentRequest {
+    patientId: string;
+    therapistId: string;
+    practiceId: string;
+    appointmentTypeId: string;
+    time: string;
+    duration: number;
+    notes: string;
+}
+
 // Get all appointments (with related Patient, Therapist, AppointmentType)
 export async function getAllAppointments() {
     const response = await axios.get<Appointment[]>(`${API_BASE}/all`);
@@ -45,7 +56,7 @@ export async function getAppointmentPractice(practiceId: string) {
 }
 
 // Create a new appointment
-export async function createAppointment(appointment: Omit<Appointment, "id">) {
+export async function createAppointment(appointment: CreateAppointmentRequest) {
     const response = await axios.post(API_BASE, appointment);
     return response.data;
 }

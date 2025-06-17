@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Appointment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #1976d2;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #1565c0;
+        }
+        .cancel-btn {
+            background-color: #666;
+        }
+        .cancel-btn:hover {
+            background-color: #555;
+        }
+        .info-section {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Create New Appointment</h1>
+        
+        <div class="info-section">
+            <h3>Appointment Details</h3>
+            <p><strong>Time:</strong> <span id="appointmentTime"></span></p>
+            <p><strong>Therapist:</strong> <span id="therapistName"></span></p>
+            <p><strong>Practice:</strong> <span id="practiceName"></span></p>
+            <p><strong>Duration:</strong> <span id="duration"></span> minutes</p>
+        </div>
+
+        <form id="appointmentForm">
+            <div class="form-group">
+                <label for="patientName">Patient Name *</label>
+                <input type="text" id="patientName" name="patientName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="patientEmail">Patient Email</label>
+                <input type="email" id="patientEmail" name="patientEmail">
+            </div>
+
+            <div class="form-group">
+                <label for="patientPhone">Patient Phone</label>
+                <input type="tel" id="patientPhone" name="patientPhone">
+            </div>
+
+            <div class="form-group">
+                <label for="appointmentType">Appointment Type *</label>
+                <select id="appointmentType" name="appointmentType" required>
+                    <option value="">Select appointment type...</option>
+                    <option value="consultation">Consultation</option>
+                    <option value="treatment">Treatment</option>
+                    <option value="follow-up">Follow-up</option>
+                    <option value="assessment">Assessment</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Notes</label>
+                <textarea id="notes" name="notes" rows="3" placeholder="Additional notes or comments..."></textarea>
+            </div>
+
+            <div>
+                <button type="submit">Create Appointment</button>
+                <button type="button" class="cancel-btn" onclick="window.close()">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Parse URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Display appointment information
+        document.getElementById('appointmentTime').textContent = 
+            new Date(urlParams.get('time')).toLocaleString();
+        document.getElementById('therapistName').textContent = 
+            decodeURIComponent(urlParams.get('therapistName') || '');
+        document.getElementById('practiceName').textContent = 
+            decodeURIComponent(urlParams.get('practiceName') || '');
+        document.getElementById('duration').textContent = 
+            urlParams.get('duration') || '25';
+
+        // Handle form submission
+        document.getElementById('appointmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const appointmentData = {
+                time: urlParams.get('time'),
+                therapistId: urlParams.get('therapistId'),
+                practiceId: urlParams.get('practiceId'),
+                duration: parseInt(urlParams.get('duration') || '25'),
+                patientName: formData.get('patientName'),
+                patientEmail: formData.get('patientEmail'),
+                patientPhone: formData.get('patientPhone'),
+                appointmentType: formData.get('appointmentType'),
+                notes: formData.get('notes')
+            };
+
+            // Here you would normally send this data to your API
+            console.log('Appointment data:', appointmentData);
+            
+            // For now, just show a success message
+            alert('Appointment created successfully!\n\n' + 
+                  'Time: ' + new Date(appointmentData.time).toLocaleString() + '\n' +
+                  'Patient: ' + appointmentData.patientName + '\n' +
+                  'Type: ' + appointmentData.appointmentType);
+            
+            // Optionally close the popup
+            window.close();
+        });
+    </script>
+</body>
+</html>
