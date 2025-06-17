@@ -10,9 +10,15 @@ export async function getPatient(id: string) {
     const response = await axios.get<Patient>(`${API_BASE}/${id}`);
     return response.data;
 }
+
+export async function getPatientAppointments(id: string) {
+    const response = await axios.get<Patient>(`${API_BASE}/${id}/appointments`);
+    return response.data;
+}
+
 // Get all patients
 export async function getAllPatients() {
-    const response = await axios.get<Patient[]>(`${API_BASE}`);
+    const response = await axios.get<Patient[]>(`${API_BASE}/all`);
     return response.data;
 }
 // Create a new patient

@@ -5,11 +5,13 @@ import { TherapistSimple } from "./TherapistSimple";
 
 export interface AppointmentSimple {
     id: string;
-    patient: PatientSimple;
-    therapist: TherapistSimple;
-    practice: PracticeSimple;
+    patientId: string;
+    therapistId: string;
+    practiceId: string;
     appointmentType: AppointmentType;
     time: string;
     duration: number;
     notes: string;
+    // Optional patient object for UI display
+    patient?: PatientSimple;
 }

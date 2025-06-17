@@ -1,17 +1,23 @@
 import axios from "axios";
 import { Practice } from "../types/Practice";
+import { TherapistSimple } from "../types/Simple/TherapistSimple";
 
-const API_BASE = "/api/practice";
+const API_BASE = "http://localhost:5003/api/practice";
 
 // Get all practices
 export async function getAllPractices() {
-    const response = await axios.get<Practice[]>(API_BASE);
+    const response = await axios.get<Practice[]>(`${API_BASE}/all`);
     return response.data;
 }
 
 // Get a single practice by ID
 export async function getPractice(id: string) {
     const response = await axios.get<Practice>(`${API_BASE}/${id}`);
+    return response.data;
+}
+
+export async function getPracticeTherapists(id: string) {
+    const response = await axios.get<TherapistSimple[]>(`${API_BASE}/${id}/therapists`);
     return response.data;
 }
 
