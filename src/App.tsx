@@ -3,7 +3,11 @@ import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ScheduleView from './pages/ScheduleView';
 import CreateAppointment from './pages/CreateAppointment';
+import EditAppointment from './pages/EditAppointment';
+import AdminPanel from './pages/AdminPanel';
 import './App.css';
+// Import environment configuration to ensure it's loaded on startup
+import './config/environment';
 
 const theme = createTheme({
   palette: {
@@ -30,6 +34,8 @@ function App() {
           <Route path="/" element={<ScheduleView />} />
           <Route path="/schedule" element={<ScheduleView />} />
           <Route path="/create-appointment" element={<CreateAppointment />} />
+          <Route path="/edit-appointment" element={<EditAppointment />} />
+          <Route path="/admin" element={<AdminPanel />} />
           {/* Add more routes here as you develop more views */}
         </Routes>
       </Router>

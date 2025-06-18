@@ -1,8 +1,9 @@
 import axios from "axios";
 import { Practice } from "../types/Practice";
 import { TherapistSimple } from "../types/Simple/TherapistSimple";
+import { config } from '../config/environment';
 
-const API_BASE = "http://localhost:5003/api/practice";
+const API_BASE = config.apiBase + 'practice';
 
 // Get all practices
 export async function getAllPractices() {

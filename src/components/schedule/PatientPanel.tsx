@@ -221,10 +221,9 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
                                     variant="outlined"
                                   />
                                 </Box>
-                              }
-                              secondary={
+                              }                              secondary={
                                 <Box>                                  <Typography variant="caption" display="block">
-                                    {appointment.appointmentType?.name || 'Appointment'}
+                                    {appointment.description || appointment.appointmentType?.name || 'Appointment'}
                                   </Typography>
                                   <Typography variant="caption" display="block">
                                     Therapist: {appointment.therapist?.name || 'Unknown'}
@@ -274,11 +273,10 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
                                     variant="outlined"
                                   />
                                 </Box>
-                              }
-                              secondary={
+                              }                              secondary={
                                 <Box>
                                   <Typography variant="caption" display="block">
-                                    {appointment.appointmentType?.name || 'Appointment'}
+                                    {appointment.description || appointment.appointmentType?.name || 'Appointment'}
                                   </Typography>
                                   <Typography variant="caption" display="block">
                                     Therapist: {appointment.therapist?.name}

@@ -100,14 +100,16 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
           );          // Ensure appointments conform to AppointmentSimple interface
           const appointments: AppointmentSimple[] = appointmentsForDate.map(apt => ({
             id: apt.id,
+            description: apt.description || '',
             patientId: apt.patient?.id || '',
-            therapistId: therapist.id,
+            therapistId: apt.therapist?.id,
             practiceId: apt.practice?.id || '',
-            appointmentType: apt.appointmentType,
+            appointmentTypeId: apt.appointmentType.id,
             time: apt.time,
             duration: apt.duration,
             notes: apt.notes || '',
-            patient: apt.patient
+            patient: apt.patient,
+            appointmentType: apt.appointmentType
           }));
 
           // Store the data
@@ -241,7 +243,6 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
       };
     });
   };
-
   const handleTimeSlotClick = (slot: TimeSlot) => {
     // Only allow clicking on empty workshift slots (not appointments)
     if (!slot.appointment && slot.isWorkShift && slot.workshift) {
@@ -262,7 +263,6 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
       });
       
       // Open a new popup window for appointment creation
-      // You'll need to create this appointment creation page
       const appointmentUrl = `/create-appointment?${params.toString()}`;
       
       const popup = window.open(
@@ -278,6 +278,68 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
         alert('Please enable popups for this site to create appointments.');
       }
     }
+  };
+
+  const handleAppointmentClick = (slot: TimeSlot) => {
+    // Handle clicking on existing appointments for editing/deleting
+    if (slot.appointment) {
+      const appointmentId = slot.appointment.id;
+      
+      // Create URL parameters for the appointment editing form
+      const params = new URLSearchParams({
+        appointmentId: appointmentId,
+      });
+      
+      // Open a new popup window for appointment editing
+      const editUrl = `/edit-appointment?${params.toString()}`;
+      
+      const popup = window.open(
+        editUrl,
+        'editAppointment',
+        'width=800,height=600,scrollbars=yes,resizable=yes,status=yes,location=yes,toolbar=no,menubar=no'
+      );
+      
+      if (popup) {
+        popup.focus();
+      } else {
+        // Fallback if popup was blocked
+        alert('Please enable popups for this site to edit appointments.');
+      }
+    }  };
+
+  // Function to get appointment colors based on appointment type
+  const getAppointmentColors = (slot: TimeSlot) => {
+    if (!slot.appointment) {
+      return {
+        backgroundColor: slot.practiceColor,
+        textColor: slot.textColor,
+        hoverBackgroundColor: slot.workshift?.practice?.color 
+          ? `${slot.workshift.practice.color}60` 
+          : theme.palette.primary.main,
+        hoverTextColor: theme.palette.getContrastText(
+          slot.workshift?.practice?.color || theme.palette.primary.main
+        )
+      };
+    }
+
+    // Use appointment type color if available
+    const appointmentTypeColor = slot.appointment.appointmentType?.color;
+    if (appointmentTypeColor) {
+      return {
+        backgroundColor: appointmentTypeColor,
+        textColor: theme.palette.getContrastText(appointmentTypeColor),
+        hoverBackgroundColor: appointmentTypeColor + 'DD', // Slightly darker on hover
+        hoverTextColor: theme.palette.getContrastText(appointmentTypeColor)
+      };
+    }
+
+    // Fallback to theme colors
+    return {
+      backgroundColor: theme.palette.secondary.light,
+      textColor: theme.palette.getContrastText(theme.palette.secondary.light),
+      hoverBackgroundColor: theme.palette.secondary.dark,
+      hoverTextColor: theme.palette.getContrastText(theme.palette.secondary.dark)
+    };
   };
 
   // Render "no therapists selected" state
@@ -444,118 +506,140 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
                       display: 'flex',
                       flexDirection: 'column'
                     }}
-                  >
-                    {/* Time slots for this therapist */}
-                    <Box sx={{ flexGrow: 1 }}>                        {therapistTimeSlots.map((slot, slotIndex) => (
-                      <Box
-                        key={`slot-${slotIndex}`}
-                        sx={{
-                          p: 0.5,
-                          height: '35px',
-                          minHeight: '35px',
-                          maxHeight: '35px',
-                          borderBottom: `1px solid ${theme.palette.divider}`,
-                          backgroundColor: hasError
-                            ? theme.palette.action.disabledBackground
-                            : (slot.appointment ? theme.palette.secondary.light : slot.practiceColor),
-                          color: hasError
-                            ? theme.palette.text.disabled
-                            : (slot.appointment ? theme.palette.getContrastText(theme.palette.info.light) : slot.textColor),                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'center',
-                          cursor: hasError 
-                            ? 'default' 
-                            : slot.appointment 
-                              ? 'pointer' 
-                              : slot.isWorkShift 
-                                ? 'pointer' 
-                                : 'default',
-                          overflow: 'hidden',
-                          boxSizing: 'border-box',
-                          transition: 'all 0.2s ease-in-out',
-                          '&:hover': hasError 
-                            ? {} 
-                            : slot.appointment 
-                              ? {
-                                  backgroundColor: theme.palette.secondary.dark,
-                                  color: theme.palette.getContrastText(theme.palette.info.dark),
-                                  transform: 'scale(1.02)',
-                                  boxShadow: theme.shadows[2],
-                                }
-                              : slot.isWorkShift 
-                                ? {
-                                    backgroundColor: slot.workshift?.practice?.color 
-                                      ? `${slot.workshift.practice.color}60` 
-                                      : theme.palette.primary.main,
-                                    color: theme.palette.getContrastText(
-                                      slot.workshift?.practice?.color || theme.palette.primary.main
-                                    ),
-                                    transform: 'scale(1.02)',
-                                    boxShadow: theme.shadows[2],
-                                  }
-                                : {}
-                        }}
-                        onClick={() => handleTimeSlotClick(slot)} // Handle time slot click
-                      >                        {slot.appointment && !hasError && (
-                          <Box sx={{ 
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                            width: '100%',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'center',
-                            height: '100%'
-                          }}>
-                            <Typography variant="body2" sx={{ 
-                              fontWeight: 'bold', 
-                              fontSize: '0.65rem', 
-                              lineHeight: 1.1,
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap'
-                            }}>
-                              {slot.appointment.appointmentType?.name || 'Appointment'}
-                            </Typography>
-                            <Typography variant="caption" sx={{ 
-                              fontSize: '0.55rem', 
-                              lineHeight: 1,
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap'
-                            }}>
-                              {slot.appointment.patient?.firstName || slot.appointment.patient?.lastName ?
-                                `${slot.appointment.patient?.firstName || ''} ${slot.appointment.patient?.lastName || ''}` :
-                                `Patient ${slot.appointment.patientId ? '#' + slot.appointment.patientId.substring(0, 4) : ''}`
-                              }
-                            </Typography>
-                          </Box>
-                        )}
+                  >                    {/* Time slots for this therapist */}
+                    <Box sx={{ flexGrow: 1 }}>                        {therapistTimeSlots.map((slot, slotIndex) => {
+                        const appointmentColors = getAppointmentColors(slot);
                         
-                        {!slot.appointment && slot.isWorkShift && !hasError && (
-                          <Box sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            height: '100%',
-                            width: '100%',
-                            opacity: 0.6,
-                            '&:hover': {
-                              opacity: 1,
-                            }
-                          }}>
-                            <Typography variant="caption" sx={{ 
-                              fontSize: '0.6rem',
-                              fontWeight: 'bold',
-                              textAlign: 'center',
-                              color: 'inherit'
-                            }}>
-                              Click to create appointment
-                            </Typography>
-                          </Box>
-                        )}
-                      </Box>
-                    ))}
+                        return (
+                          <Box
+                            key={`slot-${slotIndex}`}
+                            sx={{
+                              p: 0.5,
+                              height: '35px',
+                              minHeight: '35px',
+                              maxHeight: '35px',
+                              borderBottom: `1px solid ${theme.palette.divider}`,
+                              backgroundColor: hasError
+                                ? theme.palette.action.disabledBackground
+                                : appointmentColors.backgroundColor,
+                              color: hasError
+                                ? theme.palette.text.disabled
+                                : appointmentColors.textColor,                              display: 'flex',
+                              flexDirection: 'column',
+                              justifyContent: 'center',
+                              cursor: hasError 
+                                ? 'default' 
+                                : slot.appointment 
+                                  ? 'pointer' 
+                                  : slot.isWorkShift 
+                                    ? 'pointer' 
+                                    : 'default',
+                              overflow: 'hidden',
+                              boxSizing: 'border-box',
+                              transition: 'all 0.2s ease-in-out',
+                              '&:hover': hasError 
+                                ? {} 
+                                : slot.appointment 
+                                  ? {
+                                      backgroundColor: appointmentColors.hoverBackgroundColor,
+                                      color: appointmentColors.hoverTextColor,
+                                      transform: 'scale(1.02)',
+                                      boxShadow: theme.shadows[2],
+                                    }
+                                  : slot.isWorkShift 
+                                    ? {
+                                        backgroundColor: appointmentColors.hoverBackgroundColor,
+                                        color: appointmentColors.hoverTextColor,
+                                        transform: 'scale(1.02)',
+                                        boxShadow: theme.shadows[2],
+                                      }
+                                    : {}
+                            }}                            onClick={() => slot.appointment ? handleAppointmentClick(slot) : handleTimeSlotClick(slot)} // Handle clicks based on slot type
+                          >
+                            {slot.appointment && !hasError && (
+                              <Box sx={{ 
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                width: '100%',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                height: '100%',
+                                position: 'relative',
+                                '&:hover .edit-hint': {
+                                  opacity: 1,
+                                }
+                              }}>
+                                <Typography variant="body2" sx={{ 
+                                  fontWeight: 'bold', 
+                                  fontSize: '0.65rem', 
+                                  lineHeight: 1.1,
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap'
+                                }}>
+                                  {slot.appointment.description || 'Appointment'}
+                                </Typography>
+                                <Typography variant="caption" sx={{ 
+                                  fontSize: '0.55rem', 
+                                  lineHeight: 1,
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap'
+                                }}>
+                                  {slot.appointment.patient?.firstName || slot.appointment.patient?.lastName ?
+                                    `${slot.appointment.patient?.firstName || ''} ${slot.appointment.patient?.lastName || ''}` :
+                                    `Patient ${slot.appointment.patientId ? '#' + slot.appointment.patientId.substring(0, 4) : ''}`
+                                  }
+                                </Typography>
+                                <Typography 
+                                  className="edit-hint"
+                                  variant="caption" 
+                                  sx={{ 
+                                    fontSize: '0.5rem', 
+                                    fontWeight: 'bold',
+                                    position: 'absolute',
+                                    bottom: '2px',
+                                    right: '4px',
+                                    opacity: 0,
+                                    transition: 'opacity 0.2s',
+                                    color: 'inherit',
+                                    backgroundColor: 'rgba(0,0,0,0.2)',
+                                    padding: '1px 3px',
+                                    borderRadius: '2px',
+                                    pointerEvents: 'none'
+                                  }}
+                                >
+                                  EDIT
+                                </Typography>
+                              </Box>
+                            )}
+                            
+                            {!slot.appointment && slot.isWorkShift && !hasError && (
+                              <Box sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                height: '100%',
+                                width: '100%',
+                                opacity: 0.6,
+                                '&:hover': {
+                                  opacity: 1,
+                                }
+                              }}>
+                                <Typography variant="caption" sx={{ 
+                                  fontSize: '0.6rem',
+                                  fontWeight: 'bold',
+                                  textAlign: 'center',
+                                  color: 'inherit'
+                                }}>
+                                  Click to create appointment
+                                </Typography>
+                              </Box>
+                            )}                          </Box>
+                        );
+                      })}
                     </Box>
                   </Box>
                 );

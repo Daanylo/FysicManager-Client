@@ -41,6 +41,20 @@ const ScheduleView: React.FC = () => {
                 setRefreshKey(prev => prev + 1);
                 // Reset refresh state after a short delay
                 setTimeout(() => setIsRefreshing(false), 2000);
+            } else if (event.data.type === 'APPOINTMENT_UPDATED') {
+                console.log('Appointment updated, refreshing schedule...');
+                setIsRefreshing(true);
+                // Force SchedulePanel to refresh by updating the key
+                setRefreshKey(prev => prev + 1);
+                // Reset refresh state after a short delay
+                setTimeout(() => setIsRefreshing(false), 2000);
+            } else if (event.data.type === 'APPOINTMENT_DELETED') {
+                console.log('Appointment deleted, refreshing schedule...');
+                setIsRefreshing(true);
+                // Force SchedulePanel to refresh by updating the key
+                setRefreshKey(prev => prev + 1);
+                // Reset refresh state after a short delay
+                setTimeout(() => setIsRefreshing(false), 2000);
             }
         };
 
@@ -74,10 +88,9 @@ const ScheduleView: React.FC = () => {
             setFilteredTherapists([]);
         }
     };    return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
-            <Collapse in={isRefreshing}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>            <Collapse in={isRefreshing}>
                 <Alert severity="info" sx={{ m: 1, mb: 0 }}>
-                    Schedule updating with new appointment...
+                    Schedule updating...
                 </Alert>
             </Collapse>
             <TopNavBar />

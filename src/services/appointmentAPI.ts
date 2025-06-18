@@ -4,8 +4,10 @@ import { PatientSimple } from "../types/Simple/PatientSimple";
 import { TherapistSimple } from "../types/Simple/TherapistSimple";
 import { PracticeSimple } from "../types/Simple/PracticeSimple";
 import { AppointmentSimple } from "../types/Simple/AppointmentSimple";
+import { AppointmentType } from "../types/AppointmentType";
+import { config } from '../config/environment';
 
-const API_BASE = "http://localhost:5003/api/appointment";
+const API_BASE = config.apiBase + 'appointment';
 
 // Interface for creating appointments with simple IDs
 export interface CreateAppointmentRequest {
@@ -16,6 +18,19 @@ export interface CreateAppointmentRequest {
     time: string;
     duration: number;
     notes: string;
+    description: string;
+}
+
+// Interface for updating appointments with simple IDs
+export interface UpdateAppointmentRequest {
+    patientId: string;
+    therapistId: string;
+    practiceId: string;
+    appointmentTypeId: string;
+    time: string;
+    duration: number;
+    notes: string;
+    description: string;
 }
 
 // Get all appointments (with related Patient, Therapist, AppointmentType)
@@ -62,7 +77,7 @@ export async function createAppointment(appointment: CreateAppointmentRequest) {
 }
 
 // Update an existing appointment
-export async function updateAppointment(id: string, appointment: Appointment) {
+export async function updateAppointment(id: string, appointment: UpdateAppointmentRequest) {
     const response = await axios.put(`${API_BASE}/${id}`, appointment);
     return response.data;
 }

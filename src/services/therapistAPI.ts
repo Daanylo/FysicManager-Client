@@ -1,10 +1,12 @@
 import axios from "axios";
 import { Therapist } from "../types/Therapist";
+import { TherapistSimple } from "../types/Simple/TherapistSimple";
 import { WorkshiftSimple } from "../types/Simple/WorkshiftSimple";
 import { AppointmentSimple } from "../types/Simple/AppointmentSimple";
 import { Appointment } from "../types/Appointment";
+import { config } from '../config/environment';
 
-const API_BASE = "http://localhost:5003/api/therapist";
+const API_BASE = config.apiBase + 'therapist';
 
 // Get all therapists
 export async function getAllTherapists() {
@@ -30,13 +32,13 @@ export async function getTherapistAppointments(id: string) {
 }
 
 // Create a new therapist
-export async function createTherapist(therapist: Omit<Therapist, "id">) {
+export async function createTherapist(therapist: Omit<TherapistSimple, "id">) {
     const response = await axios.post<Therapist>(API_BASE, therapist);
     return response.data;
 }
 
 // Update an existing therapist
-export async function updateTherapist(id: string, therapist: Therapist) {
+export async function updateTherapist(id: string, therapist: TherapistSimple) {
     const response = await axios.put<{ Message: string; Therapist: Therapist }>(`${API_BASE}/${id}`, therapist);
     return response.data;
 }

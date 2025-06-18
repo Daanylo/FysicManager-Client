@@ -1,8 +1,9 @@
 import axios from "axios";
 import { Patient } from "../types/Patient";
 import { Appointment } from "../types/Appointment";
+import { config } from '../config/environment';
 
-const API_BASE = "http://localhost:5003/api/patient";
+const API_BASE = config.apiBase + 'patient';
 
 interface PatientFormData extends Omit<Patient, 'id' | 'appointments'> {}
 

@@ -5,6 +5,7 @@ import { TherapistSimple } from "./Simple/TherapistSimple";
 
 export interface Appointment {
     id: string;
+    description: string;
     patient: PatientSimple;
     therapist: TherapistSimple;
     practice: PracticeSimple;

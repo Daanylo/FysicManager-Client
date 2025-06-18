@@ -1,7 +1,8 @@
 import axios from "axios";
 import { Specialization } from "../types/Specialization";
+import { config } from '../config/environment';
 
-const API_BASE = "http://localhost:5003/api/specialization";
+const API_BASE = config.apiBase + 'specialization';
 
 // Get all specializations
 export async function getAllSpecializations() {

@@ -1,7 +1,8 @@
 import axios from "axios";
 import { AppointmentType } from "../types/AppointmentType";
+import { config } from '../config/environment';
 
-const API_BASE = "http://localhost:5003/api/appointmenttype";
+const API_BASE = config.apiBase + 'appointmenttype';
 
 // Get all appointment types
 export async function getAllAppointmentTypes(): Promise<AppointmentType[]> {
