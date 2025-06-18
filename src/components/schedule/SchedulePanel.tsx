@@ -42,6 +42,8 @@ interface TimeSlot {
   practiceColor: string;
   textColor: string;
   appointment?: AppointmentSimple;
+  isAppointmentStart?: boolean; // New property to mark the start of an appointment
+  appointmentDuration?: number; // New property to store the duration in slots
   workshift?: WorkshiftSimple;
   therapist: Therapist;
 }
@@ -187,7 +189,7 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
   const createTherapistTimeSlots = (therapistData: TherapistScheduleData): TimeSlot[] => {
     const { workshifts, appointments, therapist } = therapistData;
 
-    return timeSlots.map(date => {
+    const slots = timeSlots.map(date => {
       let isWorkShift = false;
       let practiceColor = theme.palette.background.default; // Default background for non-workshift
       let textColor = theme.palette.text.primary;
@@ -217,31 +219,54 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
             console.error('Error parsing shift time:', err);
           }
         }
-      }
-
-      // Check if this time slot has an appointment
-      let appointment: AppointmentSimple | undefined;
-      try {
-        appointment = appointments.find(apt => {
-          if (!apt.time || !apt.duration) return false;
-          const aptStart = parseISO(apt.time);
-          const aptEnd = addMinutes(aptStart, apt.duration);
-          return isWithinInterval(date, { start: aptStart, end: addMinutes(aptEnd, -1) });
-        });
-      } catch (err) {
-        console.error('Error finding appointment for time slot:', err);
-      }
-
-      return {
+      }      return {
         time: date,
         isWorkShift,
         practiceColor,
         textColor,
-        appointment,
+        appointment: undefined as AppointmentSimple | undefined,
+        isAppointmentStart: false,
+        appointmentDuration: 0,
         workshift: currentWorkshift,
         therapist,
       };
     });
+
+    // Now handle appointments - mark appointment starts and calculate durations
+    appointments.forEach(apt => {
+      if (!apt.time || !apt.duration) return;
+      
+      try {
+        const aptStart = parseISO(apt.time);
+        const aptDurationMinutes = apt.duration;
+        
+        // Find the slot that corresponds to the appointment start time
+        const startSlotIndex = slots.findIndex(slot => 
+          Math.abs(slot.time.getTime() - aptStart.getTime()) < 12.5 * 60 * 1000 // Within 12.5 minutes
+        );
+        
+        if (startSlotIndex !== -1) {
+          // Calculate how many 25-minute slots this appointment spans
+          const durationInSlots = Math.ceil(aptDurationMinutes / 25);
+          
+          // Mark the start slot
+          slots[startSlotIndex].appointment = apt;
+          slots[startSlotIndex].isAppointmentStart = true;
+          slots[startSlotIndex].appointmentDuration = durationInSlots;
+          
+          // Mark the remaining slots as part of this appointment (but not the start)
+          for (let i = 1; i < durationInSlots && startSlotIndex + i < slots.length; i++) {
+            slots[startSlotIndex + i].appointment = apt;
+            slots[startSlotIndex + i].isAppointmentStart = false;
+            slots[startSlotIndex + i].appointmentDuration = 0; // Only the start slot has the full duration
+          }
+        }
+      } catch (err) {
+        console.error('Error processing appointment for time slots:', err);
+      }
+    });
+
+    return slots;
   };
   const handleTimeSlotClick = (slot: TimeSlot) => {
     // Only allow clicking on empty workshift slots (not appointments)
@@ -508,23 +533,68 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
                     }}
                   >                    {/* Time slots for this therapist */}
                     <Box sx={{ flexGrow: 1 }}>                        {therapistTimeSlots.map((slot, slotIndex) => {
-                        const appointmentColors = getAppointmentColors(slot);
-                        
-                        return (
-                          <Box
+                        const appointmentColors = getAppointmentColors(slot);                          // If this slot is part of an appointment but not the start, render a clickable workshift slot
+                        if (slot.appointment && !slot.isAppointmentStart) {
+                          return (
+                            <Box
+                              key={`spacer-${slotIndex}`}
+                              sx={{
+                                height: '35px',
+                                minHeight: '35px',
+                                maxHeight: '35px',
+                                borderBottom: `1px solid ${theme.palette.divider}`,
+                                backgroundColor: slot.isWorkShift ? slot.practiceColor : theme.palette.background.default,
+                                cursor: slot.isWorkShift ? 'pointer' : 'default',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                opacity: 0.7,
+                                '&:hover': slot.isWorkShift ? {
+                                  opacity: 1,
+                                  backgroundColor: slot.workshift?.practice?.color 
+                                    ? `${slot.workshift.practice.color}60` 
+                                    : theme.palette.primary.main,
+                                  transform: 'scale(1.02)',
+                                  boxShadow: theme.shadows[2],
+                                } : {}
+                              }}
+                              onClick={() => slot.isWorkShift ? handleTimeSlotClick(slot) : undefined}
+                            >
+                              {slot.isWorkShift && (
+                                <Typography variant="caption" sx={{ 
+                                  fontSize: '0.55rem',
+                                  fontWeight: 'bold',
+                                  textAlign: 'center',
+                                  color: 'inherit',
+                                  opacity: 0.8
+                                }}>
+                                  Click to create
+                                </Typography>
+                              )}
+                            </Box>
+                          );
+                        }                        
+                        // Calculate the exact height based on appointment duration
+                        const baseSlotHeight = 35; // 25 minutes = 35px
+                        const baseDuration = 25; // Base duration in minutes
+                        const actualDuration = slot.appointment?.duration || baseDuration;
+                        const slotHeight = slot.appointmentDuration && slot.appointmentDuration > 1 
+                          ? `${(actualDuration / baseDuration) * baseSlotHeight}px`
+                          : '35px';
+                        return (                          <Box
                             key={`slot-${slotIndex}`}
                             sx={{
-                              p: 0.5,
-                              height: '35px',
-                              minHeight: '35px',
-                              maxHeight: '35px',
+                              height: slotHeight,
+                              minHeight: slotHeight,
+                              maxHeight: slotHeight,
                               borderBottom: `1px solid ${theme.palette.divider}`,
                               backgroundColor: hasError
                                 ? theme.palette.action.disabledBackground
                                 : appointmentColors.backgroundColor,
                               color: hasError
                                 ? theme.palette.text.disabled
-                                : appointmentColors.textColor,                              display: 'flex',
+                                : appointmentColors.textColor,
+                              display: 'flex',
                               flexDirection: 'column',
                               justifyContent: 'center',
                               cursor: hasError 
@@ -537,6 +607,8 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
                               overflow: 'hidden',
                               boxSizing: 'border-box',
                               transition: 'all 0.2s ease-in-out',
+                              position: 'relative',
+                              zIndex: slot.appointment ? 2 : 1, // Appointment blocks on top
                               '&:hover': hasError 
                                 ? {} 
                                 : slot.appointment 
@@ -545,6 +617,7 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
                                       color: appointmentColors.hoverTextColor,
                                       transform: 'scale(1.02)',
                                       boxShadow: theme.shadows[2],
+                                      zIndex: 3,
                                     }
                                   : slot.isWorkShift 
                                     ? {
@@ -554,45 +627,61 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
                                         boxShadow: theme.shadows[2],
                                       }
                                     : {}
-                            }}                            onClick={() => slot.appointment ? handleAppointmentClick(slot) : handleTimeSlotClick(slot)} // Handle clicks based on slot type
+                            }}
+                            onClick={() => slot.appointment ? handleAppointmentClick(slot) : handleTimeSlotClick(slot)} // Handle clicks based on slot type
                           >
-                            {slot.appointment && !hasError && (
-                              <Box sx={{ 
+                            {slot.appointment && !hasError && (                              <Box sx={{ 
                                 overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
                                 width: '100%',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 justifyContent: 'center',
                                 height: '100%',
                                 position: 'relative',
+                                padding: slot.appointmentDuration && slot.appointmentDuration > 1 ? '6px' : '2px 4px',
                                 '&:hover .edit-hint': {
                                   opacity: 1,
                                 }
-                              }}>
-                                <Typography variant="body2" sx={{ 
+                              }}>                                <Typography variant="body2" sx={{ 
                                   fontWeight: 'bold', 
-                                  fontSize: '0.65rem', 
-                                  lineHeight: 1.1,
+                                  fontSize: slot.appointmentDuration && slot.appointmentDuration > 1 ? '0.75rem' : '0.68rem', 
+                                  lineHeight: slot.appointmentDuration && slot.appointmentDuration > 1 ? 1.3 : 1.1,
+                                  marginBottom: slot.appointmentDuration && slot.appointmentDuration > 1 ? '2px' : '0px',
                                   overflow: 'hidden',
                                   textOverflow: 'ellipsis',
-                                  whiteSpace: 'nowrap'
+                                  display: '-webkit-box',
+                                  WebkitLineClamp: slot.appointmentDuration && slot.appointmentDuration > 1 ? 2 : 1,
+                                  WebkitBoxOrient: 'vertical',
                                 }}>
                                   {slot.appointment.description || 'Appointment'}
                                 </Typography>
                                 <Typography variant="caption" sx={{ 
-                                  fontSize: '0.55rem', 
-                                  lineHeight: 1,
+                                  fontSize: slot.appointmentDuration && slot.appointmentDuration > 1 ? '0.65rem' : '0.58rem', 
+                                  lineHeight: slot.appointmentDuration && slot.appointmentDuration > 1 ? 1.2 : 1.1,
+                                  marginBottom: slot.appointmentDuration && slot.appointmentDuration > 1 ? '2px' : '0px',
                                   overflow: 'hidden',
                                   textOverflow: 'ellipsis',
-                                  whiteSpace: 'nowrap'
+                                  display: '-webkit-box',
+                                  WebkitLineClamp: slot.appointmentDuration && slot.appointmentDuration > 1 ? 2 : 1,
+                                  WebkitBoxOrient: 'vertical',
                                 }}>
                                   {slot.appointment.patient?.firstName || slot.appointment.patient?.lastName ?
                                     `${slot.appointment.patient?.firstName || ''} ${slot.appointment.patient?.lastName || ''}` :
                                     `Patient ${slot.appointment.patientId ? '#' + slot.appointment.patientId.substring(0, 4) : ''}`
                                   }
                                 </Typography>
+                                {slot.appointmentDuration && slot.appointmentDuration > 1 && (
+                                  <Typography variant="caption" sx={{ 
+                                    fontSize: '0.6rem', 
+                                    lineHeight: 1,
+                                    opacity: 0.8,
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
+                                  }}>
+                                    Duration: {slot.appointment.duration} min
+                                  </Typography>
+                                )}
                                 <Typography 
                                   className="edit-hint"
                                   variant="caption" 
@@ -637,7 +726,8 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
                                   Click to create appointment
                                 </Typography>
                               </Box>
-                            )}                          </Box>
+                            )}
+                          </Box>
                         );
                       })}
                     </Box>

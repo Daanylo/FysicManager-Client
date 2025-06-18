@@ -12,17 +12,26 @@ import {
   ListItemButton,
   Divider,
   Chip,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Alert,
+  IconButton,
 } from '@mui/material';
+import { Add, Edit } from '@mui/icons-material';
 import { Patient } from '../../types/Patient';
 import { Appointment } from '../../types/Appointment';
-import { searchPatient, getPatient, getPatientAppointments } from '../../services/patientAPI';
+import { searchPatient, getPatient, getPatientAppointments, createPatient, updatePatient } from '../../services/patientAPI';
 import { format, parseISO, isBefore } from 'date-fns';
 
 interface PatientPanelProps {
   onNavigateToAppointment?: (appointmentDate: Date, therapistId: string) => void;
 }
 
-const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) => {  const [searchTerm, setSearchTerm] = useState('');
+const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) => {
+  const [searchTerm, setSearchTerm] = useState('');
   const [patients, setPatients] = useState<Patient[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [patientAppointments, setPatientAppointments] = useState<Appointment[]>([]);
@@ -31,6 +40,14 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
   const [loadingAppointments, setLoadingAppointments] = useState<boolean>(false);
   const [openAutocomplete, setOpenAutocomplete] = useState(false);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  
+  // Dialog states
+  const [openDialog, setOpenDialog] = useState(false);
+  const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
+  const [formData, setFormData] = useState<Partial<Patient>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   // Debounce search term
   useEffect(() => {
     console.log('searchTerm changed to:', searchTerm); // Debug log
@@ -84,12 +101,79 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
       setPatientAppointments([]);
     }
   };
-
   const handleAppointmentClick = (appointment: Appointment) => {
     if (onNavigateToAppointment && appointment.time && appointment.therapist?.id) {
       const appointmentDate = parseISO(appointment.time);
       onNavigateToAppointment(appointmentDate, appointment.therapist.id);
     }
+  };
+
+  // Dialog handling functions
+  const openCreateDialog = () => {
+    setDialogMode('create');
+    setFormData({});
+    setError(null);
+    setSuccess(null);
+    setOpenDialog(true);
+  };
+
+  const openEditDialog = () => {
+    if (!selectedPatient) return;
+    
+    setDialogMode('edit');    setFormData({
+      firstName: selectedPatient.firstName || '',
+      lastName: selectedPatient.lastName || '',
+      initials: selectedPatient.initials || '',
+      email: selectedPatient.email || '',
+      phoneNumber: selectedPatient.phoneNumber || '',
+      dateOfBirth: selectedPatient.dateOfBirth || '',
+      bsn: selectedPatient.bsn || '',
+      address: selectedPatient.address || '',
+      postalCode: selectedPatient.postalCode || '',
+      city: selectedPatient.city || '',
+      country: selectedPatient.country || '',
+    });
+    setError(null);
+    setSuccess(null);
+    setOpenDialog(true);
+  };
+
+  const closeDialog = () => {
+    setOpenDialog(false);
+    setFormData({});
+    setError(null);
+    setSuccess(null);
+  };
+  const handleSubmit = async () => {
+    // Basic validation
+    if (!formData.firstName || !formData.lastName) {
+      setError('First name and last name are required.');
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+    
+    try {
+      if (dialogMode === 'create') {
+        const newPatient = await createPatient(formData);
+        setSuccess('Patient created successfully!');
+        // Auto-select the newly created patient
+        await handlePatientSelect(null, newPatient);
+      } else if (dialogMode === 'edit' && selectedPatient) {
+        const updatedPatient = await updatePatient(selectedPatient.id, formData);
+        setSelectedPatient(updatedPatient);
+        setSuccess('Patient updated successfully!');
+      }
+      
+      closeDialog();
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (error: any) {
+      console.error(`Failed to ${dialogMode} patient:`, error);
+      setError(`Failed to ${dialogMode} patient. Please try again.`);
+    }
+    
+    setSubmitting(false);
   };
 
   // Separate appointments into past and upcoming
@@ -101,12 +185,27 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
   const pastAppointments = patientAppointments
     .filter(apt => apt.time && isBefore(parseISO(apt.time), now))
     .sort((a, b) => new Date(b.time!).getTime() - new Date(a.time!).getTime());
-
   return (
     <Paper sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Typography variant="h6" gutterBottom>
-        Patient Information
-      </Typography>      <Autocomplete
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h6">
+          Patient Information
+        </Typography>
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={<Add />}
+          onClick={openCreateDialog}
+        >
+          New Patient
+        </Button>
+      </Box>
+
+      {success && (
+        <Alert severity="success" sx={{ mb: 2 }}>
+          {success}
+        </Alert>
+      )}<Autocomplete
         open={openAutocomplete}
         onOpen={() => setOpenAutocomplete(true)}
         onClose={() => setOpenAutocomplete(false)}
@@ -160,11 +259,19 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexGrow: 1 }}>
           <CircularProgress />
         </Box>
-      ) : selectedPatient && (
-        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+      ) : selectedPatient && (        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
           {/* Patient details */}
           <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle1">Name: {selectedPatient.firstName} {selectedPatient.lastName}</Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+              <Typography variant="subtitle1">Name: {selectedPatient.firstName} {selectedPatient.lastName}</Typography>
+              <IconButton
+                size="small"
+                onClick={openEditDialog}
+                sx={{ ml: 1 }}
+              >
+                <Edit fontSize="small" />
+              </IconButton>
+            </Box>
             {selectedPatient.dateOfBirth && (
               <Typography variant="body2">DOB: {format(new Date(selectedPatient.dateOfBirth), 'dd/MM/yyyy')}</Typography>
             )}
@@ -301,10 +408,125 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
                   </Typography>
                 )}
               </Box>
-            )}
-          </Box>
+            )}          </Box>
         </Box>
       )}
+
+      {/* Create/Edit Patient Dialog */}
+      <Dialog open={openDialog} onClose={closeDialog} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          {dialogMode === 'create' ? 'Create New Patient' : 'Edit Patient'}
+        </DialogTitle>
+        <DialogContent>
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+            <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
+            <TextField
+              label="First Name *"
+              fullWidth
+              value={formData.firstName || ''}
+              onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+              margin="normal"
+              required
+            />
+            <TextField
+              label="Last Name *"
+              fullWidth
+              value={formData.lastName || ''}
+              onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+              margin="normal"
+              required
+            />
+            <TextField
+              label="Initials"
+              value={formData.initials || ''}
+              onChange={(e) => setFormData({ ...formData, initials: e.target.value })}
+              margin="normal"
+              sx={{ minWidth: 100 }}
+            />
+          </Box>
+          
+          <TextField
+            label="Email"
+            type="email"
+            fullWidth
+            value={formData.email || ''}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            margin="normal"
+          />
+          
+          <TextField
+            label="Phone Number"
+            fullWidth
+            value={formData.phoneNumber || ''}
+            onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+            margin="normal"
+          />
+          
+          <TextField
+            label="Date of Birth"
+            type="date"
+            fullWidth
+            value={formData.dateOfBirth || ''}
+            onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+            margin="normal"
+            InputLabelProps={{ shrink: true }}
+          />
+          
+          <TextField
+            label="BSN"
+            fullWidth
+            value={formData.bsn || ''}
+            onChange={(e) => setFormData({ ...formData, bsn: e.target.value })}
+            margin="normal"
+          />
+          
+          <TextField
+            label="Address"
+            fullWidth
+            value={formData.address || ''}
+            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+            margin="normal"
+          />
+            <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField
+              label="Postal Code"
+              value={formData.postalCode || ''}
+              onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+              margin="normal"
+              sx={{ minWidth: 120 }}
+            />
+            <TextField
+              label="City"
+              fullWidth
+              value={formData.city || ''}
+              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+              margin="normal"
+            />
+            <TextField
+              label="Country"
+              value={formData.country || ''}
+              onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+              margin="normal"
+              sx={{ minWidth: 120 }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeDialog}>Cancel</Button>
+          <Button 
+            onClick={handleSubmit} 
+            variant="contained"
+            disabled={submitting}
+            startIcon={submitting && <CircularProgress size={16} />}
+          >
+            {submitting ? 'Saving...' : (dialogMode === 'create' ? 'Create' : 'Update')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 };

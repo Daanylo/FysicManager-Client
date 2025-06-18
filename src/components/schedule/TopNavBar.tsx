@@ -13,11 +13,14 @@ const TopNavBar: React.FC = () => {
   return (
     <AppBar position="static">
       <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          Schedule View
-        </Typography>
+        <img 
+          src="/fysicmanager_logo.png" 
+          alt="Logo" 
+          style={{ height: 40, marginRight: 16 }}
+        />
         <Button
           color="inherit"
+          sx={{ marginLeft: 'auto' }}
           startIcon={<AdminPanelSettings />}
           onClick={handleAdminClick}
         >
