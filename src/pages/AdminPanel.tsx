@@ -140,11 +140,10 @@ const AdminPanel: React.FC = () => {
       setTherapists(therapistsData);
       setPractices(practicesData);
       setSpecializations(specializationsData);
-      setAppointmentTypes(appointmentTypesData);
-      setWorkshifts(workshiftsData);
+      setAppointmentTypes(appointmentTypesData);      setWorkshifts(workshiftsData);
     } catch (error) {
       console.error('Failed to load admin data:', error);
-      setError('Failed to load data. Please refresh the page.');
+      setError('Kan gegevens niet laden. Ververs de pagina.');
     }
     setLoading(false);
   };
@@ -230,9 +229,8 @@ const AdminPanel: React.FC = () => {
             };
             await createWorkshift(createWorkshiftData);
             break;
-        }
-        setSuccess(`${dialogType} created successfully!`);
-      } else {        switch (dialogType) {          case 'therapist':
+        }        setSuccess(`${dialogType} succesvol aangemaakt!`);
+      } else {switch (dialogType) {          case 'therapist':
             // Convert form data to TherapistSimple format
             const therapistUpdateData: TherapistSimple = {
               id: selectedItem.id,
@@ -263,16 +261,14 @@ const AdminPanel: React.FC = () => {
             };
             await updateWorkshift(updateWorkshiftData);
             break;
-        }
-        setSuccess(`${dialogType} updated successfully!`);
+        }        setSuccess(`${dialogType} succesvol bijgewerkt!`);
       }
       
       closeDialog();
       loadAllData();
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (error: any) {
+      setTimeout(() => setSuccess(null), 3000);    } catch (error: any) {
       console.error(`Failed to ${dialogMode} ${dialogType}:`, error);
-      setError(`Failed to ${dialogMode} ${dialogType}. Please try again.`);
+      setError(`Kan ${dialogType} niet ${dialogMode === 'create' ? 'aanmaken' : 'bijwerken'}. Probeer het opnieuw.`);
     }
     
     setSubmitting(false);
@@ -300,14 +296,13 @@ const AdminPanel: React.FC = () => {
           break;
       }
       
-      setSuccess(`${itemToDelete.type} deleted successfully!`);
+      setSuccess(`${itemToDelete.type} succesvol verwijderd!`);
       setDeleteDialog(false);
       setItemToDelete(null);
       loadAllData();
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (error: any) {
+      setTimeout(() => setSuccess(null), 3000);    } catch (error: any) {
       console.error(`Failed to delete ${itemToDelete.type}:`, error);
-      setError(`Failed to delete ${itemToDelete.type}. It may be in use.`);
+      setError(`Kan ${itemToDelete.type} niet verwijderen. Mogelijk is het nog in gebruik.`);
     }
     
     setSubmitting(false);
@@ -534,17 +529,15 @@ const AdminPanel: React.FC = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-        <CircularProgress />
-        <Typography sx={{ ml: 2 }}>Loading admin data...</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>        <CircularProgress />
+        <Typography sx={{ ml: 2 }}>Admin gegevens laden...</Typography>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Admin Panel
+    <Box sx={{ p: 3 }}>      <Typography variant="h4" gutterBottom>
+        Beheerpaneel
       </Typography>
       
       {success && (

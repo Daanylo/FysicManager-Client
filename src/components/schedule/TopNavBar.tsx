@@ -17,14 +17,13 @@ const TopNavBar: React.FC = () => {
           src="/fysicmanager_logo.png" 
           alt="Logo" 
           style={{ height: 40, marginRight: 16 }}
-        />
-        <Button
+        />        <Button
           color="inherit"
           sx={{ marginLeft: 'auto' }}
           startIcon={<AdminPanelSettings />}
           onClick={handleAdminClick}
         >
-          Admin
+          Beheer
         </Button>
       </Toolbar>
     </AppBar>

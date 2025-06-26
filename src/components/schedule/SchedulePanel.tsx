@@ -651,9 +651,8 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
                                   textOverflow: 'ellipsis',
                                   display: '-webkit-box',
                                   WebkitLineClamp: slot.appointmentDuration && slot.appointmentDuration > 1 ? 2 : 1,
-                                  WebkitBoxOrient: 'vertical',
-                                }}>
-                                  {slot.appointment.description || 'Appointment'}
+                                  WebkitBoxOrient: 'vertical',                                }}>
+                                  {slot.appointment.description || 'Afspraak'}
                                 </Typography>
                                 <Typography variant="caption" sx={{ 
                                   fontSize: slot.appointmentDuration && slot.appointmentDuration > 1 ? '0.65rem' : '0.58rem', 
@@ -676,10 +675,9 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
                                     lineHeight: 1,
                                     opacity: 0.8,
                                     overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap'
+                                    textOverflow: 'ellipsis',                                    whiteSpace: 'nowrap'
                                   }}>
-                                    Duration: {slot.appointment.duration} min
+                                    Duur: {slot.appointment.duration} min
                                   </Typography>
                                 )}
                                 <Typography 
@@ -696,11 +694,10 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
                                     color: 'inherit',
                                     backgroundColor: 'rgba(0,0,0,0.2)',
                                     padding: '1px 3px',
-                                    borderRadius: '2px',
-                                    pointerEvents: 'none'
+                                    borderRadius: '2px',                                    pointerEvents: 'none'
                                   }}
                                 >
-                                  EDIT
+                                  BEWERK
                                 </Typography>
                               </Box>
                             )}
@@ -719,11 +716,10 @@ const SchedulePanel: React.FC<SchedulePanelProps> = ({ selectedDate, selectedThe
                               }}>
                                 <Typography variant="caption" sx={{ 
                                   fontSize: '0.6rem',
-                                  fontWeight: 'bold',
-                                  textAlign: 'center',
+                                  fontWeight: 'bold',                                  textAlign: 'center',
                                   color: 'inherit'
                                 }}>
-                                  Click to create appointment
+                                  Klik om afspraak aan te maken
                                 </Typography>
                               </Box>
                             )}

@@ -144,10 +144,9 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
     setError(null);
     setSuccess(null);
   };
-  const handleSubmit = async () => {
-    // Basic validation
+  const handleSubmit = async () => {    // Basic validation
     if (!formData.firstName || !formData.lastName) {
-      setError('First name and last name are required.');
+      setError('Voornaam en achternaam zijn verplicht.');
       return;
     }
 
@@ -156,21 +155,19 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
     
     try {
       if (dialogMode === 'create') {
-        const newPatient = await createPatient(formData);
-        setSuccess('Patient created successfully!');
+        const newPatient = await createPatient(formData);        setSuccess('Patiënt succesvol aangemaakt!');
         // Auto-select the newly created patient
         await handlePatientSelect(null, newPatient);
       } else if (dialogMode === 'edit' && selectedPatient) {
         const updatedPatient = await updatePatient(selectedPatient.id, formData);
         setSelectedPatient(updatedPatient);
-        setSuccess('Patient updated successfully!');
+        setSuccess('Patiënt succesvol bijgewerkt!');
       }
       
       closeDialog();
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (error: any) {
+      setTimeout(() => setSuccess(null), 3000);    } catch (error: any) {
       console.error(`Failed to ${dialogMode} patient:`, error);
-      setError(`Failed to ${dialogMode} patient. Please try again.`);
+      setError(`Kan patiënt niet ${dialogMode === 'create' ? 'aanmaken' : 'bijwerken'}. Probeer het opnieuw.`);
     }
     
     setSubmitting(false);
@@ -189,7 +186,7 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
     <Paper sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h6">
-          Patient Information
+          Patiëntinformatie
         </Typography>
         <Button
           variant="contained"
@@ -197,7 +194,7 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
           startIcon={<Add />}
           onClick={openCreateDialog}
         >
-          New Patient
+          Nieuw
         </Button>
       </Box>
 
@@ -231,7 +228,7 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
                   option.phoneNumber && `Tel: ${option.phoneNumber}`,
                   option.email && `Email: ${option.email}`,
                   option.bsn && `BSN: ${option.bsn}`,
-                  option.dateOfBirth && `DOB: ${format(new Date(option.dateOfBirth), 'dd/MM/yyyy')}`
+                  option.dateOfBirth && `Geboorte: ${format(new Date(option.dateOfBirth), 'dd/MM/yyyy')}`
                 ].filter(Boolean).join(' • ')}
               </Typography>
             </Box>
@@ -261,9 +258,8 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
         </Box>
       ) : selectedPatient && (        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
           {/* Patient details */}
-          <Box sx={{ mb: 2 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-              <Typography variant="subtitle1">Name: {selectedPatient.firstName} {selectedPatient.lastName}</Typography>
+          <Box sx={{ mb: 2 }}>            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+              <Typography variant="subtitle1">Naam: {selectedPatient.firstName} {selectedPatient.lastName}</Typography>
               <IconButton
                 size="small"
                 onClick={openEditDialog}
@@ -271,22 +267,19 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
               >
                 <Edit fontSize="small" />
               </IconButton>
-            </Box>
-            {selectedPatient.dateOfBirth && (
-              <Typography variant="body2">DOB: {format(new Date(selectedPatient.dateOfBirth), 'dd/MM/yyyy')}</Typography>
-            )}
-            <Typography variant="body2">Contact: {selectedPatient.phoneNumber || 'N/A'}</Typography>
-            <Typography variant="body2">Email: {selectedPatient.email || 'N/A'}</Typography>
+            </Box>            {selectedPatient.dateOfBirth && (
+              <Typography variant="body2">Geboortedatum: {format(new Date(selectedPatient.dateOfBirth), 'dd/MM/yyyy')}</Typography>
+            )}            <Typography variant="body2">Contact: {selectedPatient.phoneNumber || 'N/A'}</Typography>
+            <Typography variant="body2">E-mail: {selectedPatient.email || 'N/A'}</Typography>
             <Typography variant="body2">BSN: {selectedPatient.bsn || 'N/A'}</Typography>
-            <Typography variant="body2">Address: {`${selectedPatient.address || ''} ${selectedPatient.postalCode || ''} ${selectedPatient.city || ''}`.trim() || 'N/A'}</Typography>
+            <Typography variant="body2">Adres: {`${selectedPatient.address || ''} ${selectedPatient.postalCode || ''} ${selectedPatient.city || ''}`.trim() || 'N/A'}</Typography>
           </Box>
 
           <Divider sx={{ my: 2 }} />
 
           {/* Appointments section */}
-          <Box sx={{ flexGrow: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            <Typography variant="h6" gutterBottom>
-              Appointments
+          <Box sx={{ flexGrow: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>            <Typography variant="h6" gutterBottom>
+              Afspraken
             </Typography>
 
             {loadingAppointments ? (
@@ -299,7 +292,7 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
                 {upcomingAppointments.length > 0 && (
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
-                      Upcoming Appointments ({upcomingAppointments.length})
+                      Aankomende Afspraken ({upcomingAppointments.length})
                     </Typography>
                     <List dense sx={{ bgcolor: 'background.paper' }}>
                       {upcomingAppointments.map((appointment) => (
@@ -320,9 +313,8 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                   <Typography variant="body2" component="span">
                                     {appointment.time && format(parseISO(appointment.time), 'dd/MM/yyyy HH:mm')}
-                                  </Typography>
-                                  <Chip
-                                    label="Upcoming"
+                                  </Typography>                                  <Chip
+                                    label="Aankomend"
                                     size="small"
                                     color="success"
                                     variant="outlined"
@@ -330,13 +322,13 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
                                 </Box>
                               }                              secondary={
                                 <Box>                                  <Typography variant="caption" display="block">
-                                    {appointment.description || appointment.appointmentType?.name || 'Appointment'}
+                                    {appointment.description || appointment.appointmentType?.name || 'Afspraak'}
                                   </Typography>
                                   <Typography variant="caption" display="block">
-                                    Therapist: {appointment.therapist?.name || 'Unknown'}
+                                    Therapeut: {appointment.therapist?.name || 'Onbekend'}
                                   </Typography>
                                   <Typography variant="caption" display="block">
-                                    Duration: {appointment.duration} min
+                                    Duur: {appointment.duration} min
                                   </Typography>
                                 </Box>
                               }
@@ -351,8 +343,7 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
                 {/* Past appointments */}
                 {pastAppointments.length > 0 && (
                   <Box>
-                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
-                      Past Appointments ({pastAppointments.length})
+                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>                      Vorige Afspraken ({pastAppointments.length})
                     </Typography>
                     <List dense sx={{ bgcolor: 'background.paper' }}>
                       {pastAppointments.slice(0, 10).map((appointment) => (
@@ -374,7 +365,7 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
                                     {appointment.time && format(parseISO(appointment.time), 'dd/MM/yyyy HH:mm')}
                                   </Typography>
                                   <Chip
-                                    label="Past"
+                                    label="Vorig"
                                     size="small"
                                     color="default"
                                     variant="outlined"
@@ -386,10 +377,10 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
                                     {appointment.description || appointment.appointmentType?.name || 'Appointment'}
                                   </Typography>
                                   <Typography variant="caption" display="block">
-                                    Therapist: {appointment.therapist?.name}
+                                    Therapeut: {appointment.therapist?.name}
                                   </Typography>
                                   <Typography variant="caption" display="block">
-                                    Duration: {appointment.duration} min
+                                    Duur: {appointment.duration} min
                                   </Typography>
                                 </Box>
                               }
@@ -402,9 +393,8 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
                 )}
 
                 {/* No appointments message */}
-                {!loadingAppointments && patientAppointments.length === 0 && (
-                  <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mt: 2 }}>
-                    No appointments found for this patient.
+                {!loadingAppointments && patientAppointments.length === 0 && (                  <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mt: 2 }}>
+                    Geen afspraken gevonden voor deze patiënt.
                   </Typography>
                 )}
               </Box>
@@ -413,9 +403,8 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
       )}
 
       {/* Create/Edit Patient Dialog */}
-      <Dialog open={openDialog} onClose={closeDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {dialogMode === 'create' ? 'Create New Patient' : 'Edit Patient'}
+      <Dialog open={openDialog} onClose={closeDialog} maxWidth="sm" fullWidth>        <DialogTitle>
+          {dialogMode === 'create' ? 'Nieuwe Patiënt Aanmaken' : 'Patiënt Bewerken'}
         </DialogTitle>
         <DialogContent>
           {error && (
@@ -423,9 +412,8 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
               {error}
             </Alert>
           )}
-            <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
-            <TextField
-              label="First Name *"
+            <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>            <TextField
+              label="Voornaam *"
               fullWidth
               value={formData.firstName || ''}
               onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
@@ -433,7 +421,7 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
               required
             />
             <TextField
-              label="Last Name *"
+              label="Achternaam *"
               fullWidth
               value={formData.lastName || ''}
               onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
@@ -441,16 +429,15 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
               required
             />
             <TextField
-              label="Initials"
+              label="Initialen"
               value={formData.initials || ''}
               onChange={(e) => setFormData({ ...formData, initials: e.target.value })}
               margin="normal"
               sx={{ minWidth: 100 }}
             />
           </Box>
-          
-          <TextField
-            label="Email"
+            <TextField
+            label="E-mail"
             type="email"
             fullWidth
             value={formData.email || ''}
@@ -459,7 +446,7 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
           />
           
           <TextField
-            label="Phone Number"
+            label="Telefoonnummer"
             fullWidth
             value={formData.phoneNumber || ''}
             onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
@@ -467,7 +454,7 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
           />
           
           <TextField
-            label="Date of Birth"
+            label="Geboortedatum"
             type="date"
             fullWidth
             value={formData.dateOfBirth || ''}
@@ -483,9 +470,8 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
             onChange={(e) => setFormData({ ...formData, bsn: e.target.value })}
             margin="normal"
           />
-          
-          <TextField
-            label="Address"
+            <TextField
+            label="Adres"
             fullWidth
             value={formData.address || ''}
             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
@@ -493,37 +479,36 @@ const PatientPanel: React.FC<PatientPanelProps> = ({ onNavigateToAppointment }) 
           />
             <Box sx={{ display: 'flex', gap: 2 }}>
             <TextField
-              label="Postal Code"
+              label="Postcode"
               value={formData.postalCode || ''}
               onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
               margin="normal"
               sx={{ minWidth: 120 }}
             />
             <TextField
-              label="City"
+              label="Stad"
               fullWidth
               value={formData.city || ''}
               onChange={(e) => setFormData({ ...formData, city: e.target.value })}
               margin="normal"
             />
             <TextField
-              label="Country"
+              label="Land"
               value={formData.country || ''}
               onChange={(e) => setFormData({ ...formData, country: e.target.value })}
               margin="normal"
               sx={{ minWidth: 120 }}
             />
           </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeDialog}>Cancel</Button>
+        </DialogContent>        <DialogActions>
+          <Button onClick={closeDialog}>Annuleren</Button>
           <Button 
             onClick={handleSubmit} 
             variant="contained"
             disabled={submitting}
             startIcon={submitting && <CircularProgress size={16} />}
           >
-            {submitting ? 'Saving...' : (dialogMode === 'create' ? 'Create' : 'Update')}
+            {submitting ? 'Opslaan...' : (dialogMode === 'create' ? 'Aanmaken' : 'Bijwerken')}
           </Button>
         </DialogActions>
       </Dialog>

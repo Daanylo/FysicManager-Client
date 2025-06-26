@@ -26,9 +26,8 @@ const CalendarPanel: React.FC<CalendarPanelProps> = ({ onDateSelected, selectedD
   };
 
   return (
-    <Paper sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Typography variant="h6" gutterBottom>
-        Select Date & Notes
+    <Paper sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>      <Typography variant="h6" gutterBottom>
+        Datum Selecteren & Notities
       </Typography>
       <LocalizationProvider dateAdapter={AdapterDateFns}>        <StaticDatePicker
           displayStaticWrapperAs="desktop"
@@ -36,9 +35,8 @@ const CalendarPanel: React.FC<CalendarPanelProps> = ({ onDateSelected, selectedD
           onChange={handleDateChange}
           sx={{ backgroundColor: 'transparent'}} // Ensuring calendar background is transparent
         />
-      </LocalizationProvider>
-      <TextField
-        label="Notes"
+      </LocalizationProvider>      <TextField
+        label="Notities"
         multiline
         rows={4}
         variant="outlined"

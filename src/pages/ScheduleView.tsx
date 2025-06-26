@@ -90,7 +90,7 @@ const ScheduleView: React.FC = () => {
     };    return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>            <Collapse in={isRefreshing}>
                 <Alert severity="info" sx={{ m: 1, mb: 0 }}>
-                    Schedule updating...
+                    Planning wordt bijgewerkt...
                 </Alert>
             </Collapse>
             <TopNavBar />

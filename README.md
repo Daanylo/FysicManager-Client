@@ -1,46 +1,175 @@
-# Getting Started with Create React App
+# Fysic Manager Client
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Een moderne React-applicatie voor het beheren van fysiotherapie praktijken, afspraken en patiënten.
 
-## Available Scripts
+## Project Overzicht
 
-In the project directory, you can run:
+Fysic Manager Client is een webapplicatie gebouwd met React en TypeScript die een intuïtieve interface biedt voor fysiotherapie praktijken. De applicatie stelt gebruikers in staat om therapeuten, patiënten, afspraken, praktijken en werkschema's efficiënt te beheren.
+
+### Hoofdfuncties
+
+- **📅 Afspraak Planning**: Visuele planning met drag-and-drop functionaliteit
+- **👥 Patiënt Beheer**: Uitgebreid patiëntenbeheer met zoekfunctionaliteit
+- **🏥 Praktijk Beheer**: Beheer van meerdere praktijklocaties
+- **👨‍⚕️ Therapeut Beheer**: Therapeuten met specialisaties en werkschema's
+- **⚙️ Admin Panel**: Centrale beheerinterface voor alle entiteiten
+- **🗓️ Kalender Integratie**: Geïntegreerde kalenderweergave
+
+## Technische Stack
+
+- **Frontend Framework**: React 18 met TypeScript
+- **UI Library**: Material-UI (MUI)
+- **Date Handling**: date-fns voor datummanipulatie
+- **State Management**: React Hooks
+- **HTTP Client**: Axios voor API communicatie
+- **Build Tool**: Create React App
+
+## API Integratie
+
+De applicatie communiceert met een .NET backend API via RESTful endpoints. Alle API services zijn georganiseerd in de `src/services/` directory:
+
+### API Services
+
+- **`appointmentAPI.ts`**: CRUD operaties voor afspraken
+- **`patientAPI.ts`**: Patiënt zoeken, aanmaken en bijwerken
+- **`therapistAPI.ts`**: Therapeut beheer en filtering
+- **`practiceAPI.ts`**: Praktijk informatie en therapeut-toewijzingen
+- **`specializationAPI.ts`**: Specialisatie beheer
+- **`appointmentTypeAPI.ts`**: Afspraak type configuratie
+- **`workshiftAPI.ts`**: Werkschema beheer
+
+### API Configuratie
+
+De base URL van de API wordt geconfigureerd in `src/config/environment.ts`:
+
+```typescript
+export const API_BASE_URL = 'https://localhost:7132/api';
+```
+
+### Typering
+
+Het project gebruikt TypeScript interfaces voor type-veiligheid:
+
+- **Core Types**: `src/types/` - Hoofdentiteiten (Patient, Therapist, Appointment, etc.)
+- **Simple Types**: `src/types/Simple/` - Vereenvoudigde versies voor API communicatie
+
+## Project Structuur
+
+```
+src/
+├── components/          # Herbruikbare React componenten
+│   └── schedule/       # Planning-gerelateerde componenten
+├── pages/              # Hoofdpagina componenten
+├── services/           # API service laag
+├── types/              # TypeScript type definities
+├── config/             # Configuratie bestanden
+└── App.tsx            # Hoofdapplicatie component
+```
+
+### Belangrijke Componenten
+
+- **`ScheduleView`**: Hoofdplanning interface
+- **`AdminPanel`**: Beheerinterface voor alle entiteiten
+- **`CreateAppointment`**: Afspraak aanmaak formulier
+- **`EditAppointment`**: Afspraak bewerkingsformulier
+
+## Installatie en Setup
+
+### Vereisten
+
+- Node.js (versie 16 of hoger)
+- npm of yarn
+- Een draaiende instance van de Fysic Manager API
+
+### Installatie
+
+1. Clone de repository:
+```bash
+git clone <repository-url>
+cd fysic-manager-client
+```
+
+2. Installeer dependencies:
+```bash
+npm install
+```
+
+3. Configureer de API URL in `src/config/environment.ts`
+
+4. Start de development server:
+```bash
+npm start
+```
+
+De applicatie draait nu op [http://localhost:3000](http://localhost:3000)
+
+## Beschikbare Scripts
 
 ### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+Start de applicatie in development mode. De pagina wordt automatisch herladen bij wijzigingen.
 
 ### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Start de test runner in interactieve watch mode.
 
 ### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Bouwt de applicatie voor productie naar de `build` folder. De build is geoptimaliseerd voor de beste prestaties.
 
 ### `npm run eject`
+**Let op: dit is een onomkeerbare operatie!**
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+Eject onthult alle configuratiebestanden voor volledige controle over de build setup.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Features in Detail
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+### Planning Interface
+- **Time-slot gebaseerde weergave**: Therapeuten als kolommen, tijdslots als rijen
+- **Visuele afspraak blokken**: Kleurgecodeerd op basis van afspraak type
+- **Interactieve afspraak creatie**: Klik op beschikbare tijdslots
+- **Real-time updates**: Automatische refresh bij wijzigingen
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### Patiënt Beheer
+- **Geavanceerd zoeken**: Zoek op naam, telefoon, email of BSN
+- **Autocomplete functionaliteit**: Snelle patiënt selectie
+- **Uitgebreide patiënt profielen**: Contactgegevens en afspraak geschiedenis
+- **Inline bewerking**: Directe updates via modal dialogen
 
-## Learn More
+### Admin Panel
+- **Tab-gebaseerde interface**: Aparte secties per entiteit type
+- **CRUD operaties**: Volledig beheer van alle data
+- **Bulk acties**: Efficiënt beheer van meerdere items
+- **Validatie**: Client-side en server-side validatie
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Ontwikkeling
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Code Structuur
+- **Component-based architectuur**: Modulaire, herbruikbare componenten
+- **Service layer**: Gescheiden API logica
+- **Type-safe**: Volledige TypeScript ondersteuning
+- **Material Design**: Consistente UI/UX
+
+### Styling
+- **Material-UI theming**: Aangepaste kleurenschema's
+- **Responsive design**: Werkt op desktop en tablet
+- **Nederlandse interface**: Volledig vertaalde gebruikersinterface
+
+### Error Handling
+- **Graceful degradation**: Elegante foutafhandeling
+- **User feedback**: Duidelijke error en success berichten
+- **Retry mechanismen**: Automatische herverbinding bij netwerkfouten
+
+## Deployment
+
+Voor productie deployment:
+
+1. Bouw de applicatie:
+```bash
+npm run build
+```
+
+2. Serve de `build` folder met een statische webserver
+3. Configureer de API URL voor productie environment
+4. Zorg ervoor dat de backend API toegankelijk is
+
+## Ondersteuning
+
+Voor vragen over de implementatie of het gebruik van deze applicatie, raadpleeg de API documentatie of neem contact op met het ontwikkelteam.

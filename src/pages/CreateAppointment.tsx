@@ -168,12 +168,11 @@ const CreateAppointment: React.FC = () => {
         return;
       }      // Create appointment
       const selectedAppointmentType = appointmentTypes.find(type => type.id === appointmentTypeId);
-      
-      if (!selectedAppointmentType) {
-        setError('Please select a valid appointment type');
+        if (!selectedAppointmentType) {
+        setError('Selecteer een geldig afspraak type');
         setLoadingSubmit(false);
         return;
-      }      // Format time to ISO string if it's not already
+      }// Format time to ISO string if it's not already
       let formattedTime = urlParams.time!;
       try {
         // If the time is not in ISO format, try to parse and convert it
@@ -197,7 +196,7 @@ const CreateAppointment: React.FC = () => {
         description: description.trim(), // Use the user-provided description
       };      // Validate that all required fields are present
       if (!appointmentData.patientId || !appointmentData.therapistId || !appointmentData.practiceId || !appointmentData.appointmentTypeId || !appointmentData.time || !appointmentData.description) {
-        setError('Missing required appointment information. Please ensure all fields are filled.');
+        setError('Ontbrekende verplichte afspraak informatie. Zorg ervoor dat alle velden zijn ingevuld.');
         setLoadingSubmit(false);
         return;
       }console.log('Creating appointment with data:', appointmentData);
@@ -237,13 +236,12 @@ const CreateAppointment: React.FC = () => {
           console.error('Validation errors:', error.response.data.errors);
           const validationErrors = Object.entries(error.response.data.errors)
             .map(([field, messages]: [string, any]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
-            .join('; ');
-          setError(`Validation errors: ${validationErrors}`);
+            .join('; ');          setError(`Validatie fouten: ${validationErrors}`);
         } else {
-          setError(`Failed to create appointment: ${error.response.data.title || error.response.data.message || 'Unknown error'}`);
+          setError(`Kan afspraak niet aanmaken: ${error.response.data.title || error.response.data.message || 'Onbekende fout'}`);
         }
       } else {
-        setError('Failed to create appointment. Please try again.');
+        setError('Kan afspraak niet aanmaken. Probeer het opnieuw.');
       }
     }
 

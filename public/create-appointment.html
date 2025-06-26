@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Appointment</title>
+    <title>Afspraak Maken</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -67,52 +67,49 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Create New Appointment</h1>
+    <div class="container">        <h1>Nieuwe Afspraak Maken</h1>
         
         <div class="info-section">
-            <h3>Appointment Details</h3>
-            <p><strong>Time:</strong> <span id="appointmentTime"></span></p>
-            <p><strong>Therapist:</strong> <span id="therapistName"></span></p>
-            <p><strong>Practice:</strong> <span id="practiceName"></span></p>
-            <p><strong>Duration:</strong> <span id="duration"></span> minutes</p>
-        </div>
-
-        <form id="appointmentForm">
+            <h3>Afspraak Details</h3>
+            <p><strong>Tijd:</strong> <span id="appointmentTime"></span></p>
+            <p><strong>Therapeut:</strong> <span id="therapistName"></span></p>
+            <p><strong>Praktijk:</strong> <span id="practiceName"></span></p>
+            <p><strong>Duur:</strong> <span id="duration"></span> minuten</p>
+        </div>        <form id="appointmentForm">
             <div class="form-group">
-                <label for="patientName">Patient Name *</label>
+                <label for="patientName">Patiënt Naam *</label>
                 <input type="text" id="patientName" name="patientName" required>
             </div>
 
             <div class="form-group">
-                <label for="patientEmail">Patient Email</label>
+                <label for="patientEmail">Patiënt E-mail</label>
                 <input type="email" id="patientEmail" name="patientEmail">
             </div>
 
             <div class="form-group">
-                <label for="patientPhone">Patient Phone</label>
+                <label for="patientPhone">Patiënt Telefoon</label>
                 <input type="tel" id="patientPhone" name="patientPhone">
             </div>
 
             <div class="form-group">
-                <label for="appointmentType">Appointment Type *</label>
+                <label for="appointmentType">Afspraak Type *</label>
                 <select id="appointmentType" name="appointmentType" required>
-                    <option value="">Select appointment type...</option>
-                    <option value="consultation">Consultation</option>
-                    <option value="treatment">Treatment</option>
+                    <option value="">Selecteer afspraak type...</option>
+                    <option value="consultation">Consult</option>
+                    <option value="treatment">Behandeling</option>
                     <option value="follow-up">Follow-up</option>
-                    <option value="assessment">Assessment</option>
+                    <option value="assessment">Beoordeling</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="notes">Notes</label>
-                <textarea id="notes" name="notes" rows="3" placeholder="Additional notes or comments..."></textarea>
+                <label for="notes">Notities</label>
+                <textarea id="notes" name="notes" rows="3" placeholder="Aanvullende notities of opmerkingen..."></textarea>
             </div>
 
             <div>
-                <button type="submit">Create Appointment</button>
-                <button type="button" class="cancel-btn" onclick="window.close()">Cancel</button>
+                <button type="submit">Afspraak Maken</button>
+                <button type="button" class="cancel-btn" onclick="window.close()">Annuleren</button>
             </div>
         </form>
     </div>
@@ -152,9 +149,9 @@
             console.log('Appointment data:', appointmentData);
             
             // For now, just show a success message
-            alert('Appointment created successfully!\n\n' + 
-                  'Time: ' + new Date(appointmentData.time).toLocaleString() + '\n' +
-                  'Patient: ' + appointmentData.patientName + '\n' +
+            alert('Afspraak succesvol aangemaakt!\n\n' + 
+                  'Tijd: ' + new Date(appointmentData.time).toLocaleString() + '\n' +
+                  'Patiënt: ' + appointmentData.patientName + '\n' +
                   'Type: ' + appointmentData.appointmentType);
             
             // Optionally close the popup

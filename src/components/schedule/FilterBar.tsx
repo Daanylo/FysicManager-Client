@@ -271,10 +271,9 @@ const FilterBar: React.FC<FilterBarProps> = ({ onTherapistsSelected, onFilteredT
           {loadingTherapists ? (
             <MenuItem disabled>
               <CircularProgress size={20} />
-            </MenuItem>
-          ) : filteredTherapists.length === 0 ? (
+            </MenuItem>          ) : filteredTherapists.length === 0 ? (
             <MenuItem disabled>
-              No therapists match filters
+              Geen therapeuten voldoen aan filters
             </MenuItem>
           ) : (
             filteredTherapists.map((therapist) => (
@@ -286,10 +285,9 @@ const FilterBar: React.FC<FilterBarProps> = ({ onTherapistsSelected, onFilteredT
         </Select>
       </FormControl>
 
-      {selectedTherapistIds.length > 0 && (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      {selectedTherapistIds.length > 0 && (        <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
-            {selectedTherapistIds.length} therapists selected
+            {selectedTherapistIds.length} therapeuten geselecteerd
           </Typography>
         </Box>
       )}
