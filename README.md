@@ -185,3 +185,7 @@ npm run build
 ## Support
 
 For questions about implementation or usage of this application, consult the API documentation in the [backend repository](https://github.com/Daanylo/FysicManager-API) or contact the development team.
+
+<div align="center">
+    <img src="https://mmmlabel.tech/wp-content/themes/mmmlabel/icons/color/128px/cyborg/cyborg.svg" alt="Made together with genAI" height="100">
+</div>
