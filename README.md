@@ -1,175 +1,187 @@
-# Fysic Manager Client
+<div align="center">
+  <img src="public/fysicmanager_logo.png" alt="Fysic Manager Logo" width="200"/>
+</div>
 
-Een moderne React-applicatie voor het beheren van fysiotherapie praktijken, afspraken en patiënten.
+# FysicManager Client
 
-## Project Overzicht
+A modern React application for managing physiotherapy practices, appointments, and patients.
 
-Fysic Manager Client is een webapplicatie gebouwd met React en TypeScript die een intuïtieve interface biedt voor fysiotherapie praktijken. De applicatie stelt gebruikers in staat om therapeuten, patiënten, afspraken, praktijken en werkschema's efficiënt te beheren.
+## Project Overview
 
-### Hoofdfuncties
+FysicManager Client is a web application built with React and TypeScript that provides an intuitive interface for physiotherapy practices. The application enables users to efficiently manage therapists, patients, appointments, practices, and work schedules.
 
-- **📅 Afspraak Planning**: Visuele planning met drag-and-drop functionaliteit
-- **👥 Patiënt Beheer**: Uitgebreid patiëntenbeheer met zoekfunctionaliteit
-- **🏥 Praktijk Beheer**: Beheer van meerdere praktijklocaties
-- **👨‍⚕️ Therapeut Beheer**: Therapeuten met specialisaties en werkschema's
-- **⚙️ Admin Panel**: Centrale beheerinterface voor alle entiteiten
-- **🗓️ Kalender Integratie**: Geïntegreerde kalenderweergave
+This client application works in conjunction with the [FysicManager-API](https://github.com/Daanylo/FysicManager-API) backend to provide a complete practice management solution.
 
-## Technische Stack
+### Key Features
 
-- **Frontend Framework**: React 18 met TypeScript
+- **📅 Appointment Scheduling**: Visual scheduling with drag-and-drop functionality
+- **👥 Patient Management**: Comprehensive patient management with search functionality
+- **🏥 Practice Management**: Management of multiple practice locations
+- **👨‍⚕️ Therapist Management**: Therapists with specializations and work schedules
+- **⚙️ Admin Panel**: Central management interface for all entities
+- **🗓️ Calendar Integration**: Integrated calendar view
+
+## Technology Stack
+
+- **Frontend Framework**: React 18 with TypeScript
 - **UI Library**: Material-UI (MUI)
-- **Date Handling**: date-fns voor datummanipulatie
+- **Date Handling**: date-fns for date manipulation
 - **State Management**: React Hooks
-- **HTTP Client**: Axios voor API communicatie
+- **HTTP Client**: Axios for API communication
 - **Build Tool**: Create React App
 
-## API Integratie
+## API Integration
 
-De applicatie communiceert met een .NET backend API via RESTful endpoints. Alle API services zijn georganiseerd in de `src/services/` directory:
+The application communicates with a .NET backend API via RESTful endpoints. For complete API documentation and backend setup, see the [Daanylo-FysicManager-API](https://github.com/Daanylo/FysicManager-API) repository.
+
+All API services are organized in the `src/services/` directory:
 
 ### API Services
 
-- **`appointmentAPI.ts`**: CRUD operaties voor afspraken
-- **`patientAPI.ts`**: Patiënt zoeken, aanmaken en bijwerken
-- **`therapistAPI.ts`**: Therapeut beheer en filtering
-- **`practiceAPI.ts`**: Praktijk informatie en therapeut-toewijzingen
-- **`specializationAPI.ts`**: Specialisatie beheer
-- **`appointmentTypeAPI.ts`**: Afspraak type configuratie
-- **`workshiftAPI.ts`**: Werkschema beheer
+- **`appointmentAPI.ts`**: CRUD operations for appointments
+- **`patientAPI.ts`**: Patient search, creation, and updates
+- **`therapistAPI.ts`**: Therapist management and filtering
+- **`practiceAPI.ts`**: Practice information and therapist assignments
+- **`specializationAPI.ts`**: Specialization management
+- **`appointmentTypeAPI.ts`**: Appointment type configuration
+- **`workshiftAPI.ts`**: Work schedule management
 
-### API Configuratie
+### API Configuration
 
-De base URL van de API wordt geconfigureerd in `src/config/environment.ts`:
+The API base URL is configured in `src/config/environment.ts`:
 
 ```typescript
 export const API_BASE_URL = 'https://localhost:7132/api';
 ```
 
-### Typering
+### Type Safety
 
-Het project gebruikt TypeScript interfaces voor type-veiligheid:
+The project uses TypeScript interfaces for type safety:
 
-- **Core Types**: `src/types/` - Hoofdentiteiten (Patient, Therapist, Appointment, etc.)
-- **Simple Types**: `src/types/Simple/` - Vereenvoudigde versies voor API communicatie
+- **Core Types**: `src/types/` - Main entities (Patient, Therapist, Appointment, etc.)
+- **Simple Types**: `src/types/Simple/` - Simplified versions for API communication
 
-## Project Structuur
+## Project Structure
 
 ```
 src/
-├── components/          # Herbruikbare React componenten
-│   └── schedule/       # Planning-gerelateerde componenten
-├── pages/              # Hoofdpagina componenten
-├── services/           # API service laag
-├── types/              # TypeScript type definities
-├── config/             # Configuratie bestanden
-└── App.tsx            # Hoofdapplicatie component
+├── components/          # Reusable React components
+│   └── schedule/       # Scheduling-related components
+├── pages/              # Main page components
+├── services/           # API service layer
+├── types/              # TypeScript type definitions
+├── config/             # Configuration files
+└── App.tsx            # Main application component
 ```
 
-### Belangrijke Componenten
+### Important Components
 
-- **`ScheduleView`**: Hoofdplanning interface
-- **`AdminPanel`**: Beheerinterface voor alle entiteiten
-- **`CreateAppointment`**: Afspraak aanmaak formulier
-- **`EditAppointment`**: Afspraak bewerkingsformulier
+- **`ScheduleView`**: Main scheduling interface
+- **`AdminPanel`**: Management interface for all entities
+- **`CreateAppointment`**: Appointment creation form
+- **`EditAppointment`**: Appointment editing form
 
-## Installatie en Setup
+## Installation and Setup
 
-### Vereisten
+### Prerequisites
 
-- Node.js (versie 16 of hoger)
-- npm of yarn
-- Een draaiende instance van de Fysic Manager API
+- Node.js (version 16 or higher)
+- npm or yarn
+- A running instance of the [Fysic Manager API](https://github.com/Daanylo/FysicManager-API)
 
-### Installatie
+### Installation
 
-1. Clone de repository:
+1. Clone the repository:
 ```bash
 git clone <repository-url>
 cd fysic-manager-client
 ```
 
-2. Installeer dependencies:
+2. Install dependencies:
 ```bash
 npm install
 ```
 
-3. Configureer de API URL in `src/config/environment.ts`
+3. Configure the API URL in `src/config/environment.ts`
 
-4. Start de development server:
+4. Start the development server:
 ```bash
 npm start
 ```
 
-De applicatie draait nu op [http://localhost:3000](http://localhost:3000)
+The application now runs on [http://localhost:3000](http://localhost:3000)
 
-## Beschikbare Scripts
+## Available Scripts
 
 ### `npm start`
-Start de applicatie in development mode. De pagina wordt automatisch herladen bij wijzigingen.
+Starts the application in development mode. The page automatically reloads when changes are made.
 
 ### `npm test`
-Start de test runner in interactieve watch mode.
+Starts the test runner in interactive watch mode.
 
 ### `npm run build`
-Bouwt de applicatie voor productie naar de `build` folder. De build is geoptimaliseerd voor de beste prestaties.
+Builds the application for production to the `build` folder. The build is optimized for best performance.
 
 ### `npm run eject`
-**Let op: dit is een onomkeerbare operatie!**
+**Warning: this is a one-way operation!**
 
-Eject onthult alle configuratiebestanden voor volledige controle over de build setup.
+Eject reveals all configuration files for full control over the build setup.
 
 ## Features in Detail
 
-### Planning Interface
-- **Time-slot gebaseerde weergave**: Therapeuten als kolommen, tijdslots als rijen
-- **Visuele afspraak blokken**: Kleurgecodeerd op basis van afspraak type
-- **Interactieve afspraak creatie**: Klik op beschikbare tijdslots
-- **Real-time updates**: Automatische refresh bij wijzigingen
+### Scheduling Interface
+- **Time-slot based display**: Therapists as columns, time slots as rows
+- **Visual appointment blocks**: Color-coded based on appointment type
+- **Interactive appointment creation**: Click on available time slots
+- **Real-time updates**: Automatic refresh when changes occur
 
-### Patiënt Beheer
-- **Geavanceerd zoeken**: Zoek op naam, telefoon, email of BSN
-- **Autocomplete functionaliteit**: Snelle patiënt selectie
-- **Uitgebreide patiënt profielen**: Contactgegevens en afspraak geschiedenis
-- **Inline bewerking**: Directe updates via modal dialogen
+### Patient Management
+- **Advanced search**: Search by name, phone, email, or BSN
+- **Autocomplete functionality**: Quick patient selection
+- **Comprehensive patient profiles**: Contact details and appointment history
+- **Inline editing**: Direct updates via modal dialogs
 
 ### Admin Panel
-- **Tab-gebaseerde interface**: Aparte secties per entiteit type
-- **CRUD operaties**: Volledig beheer van alle data
-- **Bulk acties**: Efficiënt beheer van meerdere items
-- **Validatie**: Client-side en server-side validatie
+- **Tab-based interface**: Separate sections per entity type
+- **CRUD operations**: Complete management of all data
+- **Bulk actions**: Efficient management of multiple items
+- **Validation**: Client-side and server-side validation
 
-## Ontwikkeling
+## Development
 
-### Code Structuur
-- **Component-based architectuur**: Modulaire, herbruikbare componenten
-- **Service layer**: Gescheiden API logica
-- **Type-safe**: Volledige TypeScript ondersteuning
-- **Material Design**: Consistente UI/UX
+### Code Structure
+- **Component-based architecture**: Modular, reusable components
+- **Service layer**: Separated API logic
+- **Type-safe**: Full TypeScript support
+- **Material Design**: Consistent UI/UX
 
 ### Styling
-- **Material-UI theming**: Aangepaste kleurenschema's
-- **Responsive design**: Werkt op desktop en tablet
-- **Nederlandse interface**: Volledig vertaalde gebruikersinterface
+- **Material-UI theming**: Custom color schemes
+- **Responsive design**: Works on desktop and tablet
+- **Dutch interface**: Fully translated user interface
 
 ### Error Handling
-- **Graceful degradation**: Elegante foutafhandeling
-- **User feedback**: Duidelijke error en success berichten
-- **Retry mechanismen**: Automatische herverbinding bij netwerkfouten
+- **Graceful degradation**: Elegant error handling
+- **User feedback**: Clear error and success messages
+- **Retry mechanisms**: Automatic reconnection on network errors
 
 ## Deployment
 
-Voor productie deployment:
+For production deployment:
 
-1. Bouw de applicatie:
+1. Build the application:
 ```bash
 npm run build
 ```
 
-2. Serve de `build` folder met een statische webserver
-3. Configureer de API URL voor productie environment
-4. Zorg ervoor dat de backend API toegankelijk is
+2. Serve the `build` folder with a static web server
+3. Configure the API URL for production environment
+4. Ensure the [backend API](https://github.com/Daanylo/FysicManager-API) is accessible
 
-## Ondersteuning
+## Related Repositories
 
-Voor vragen over de implementatie of het gebruik van deze applicatie, raadpleeg de API documentatie of neem contact op met het ontwikkelteam.
+- **Backend API**: [FysicManager-API](https://github.com/Daanylo/FysicManager-API) - .NET Core Web API providing the backend services
+
+## Support
+
+For questions about implementation or usage of this application, consult the API documentation in the [backend repository](https://github.com/Daanylo/FysicManager-API) or contact the development team.
